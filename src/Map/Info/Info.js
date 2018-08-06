@@ -46,6 +46,11 @@ class Info extends PureComponent {
 
   theme = {};
 
+  componentDidMount() {
+    const { onMount, region } = this.props;
+    if (onMount) onMount({ id: region, ref: this.wrapRef });
+  }
+
   currentTheme = () => {
     const { hover } = this.state;
     let current = 'normal';
@@ -65,11 +70,6 @@ class Info extends PureComponent {
 
     return this.theme[current];
   };
-
-  componentDidMount() {
-    const { onMount, region } = this.props;
-    if (onMount) onMount({ id: region, ref: this.wrapRef });
-  }
 
   onMouseEnter = () => this.setState({ hover: true });
 

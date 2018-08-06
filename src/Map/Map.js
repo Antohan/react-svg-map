@@ -72,6 +72,19 @@ class Map extends PureComponent {
 
   theme = null;
 
+  componentDidMount() {
+    this.onRegionsUpdate(true);
+    window.addEventListener('resize', this.onRegionsUpdate);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('resize', this.onRegionsUpdate);
+  }
+
+  componentDidUpdate() {
+    this.onRegionsUpdate();
+  }
+
   currentTheme = () => {
     if (!this.theme) {
       const { theme } = this.props;
@@ -120,19 +133,6 @@ class Map extends PureComponent {
     if (onRegionClick) onRegionClick(region);
     this.setState({ region: region.id }, () => this.onRegionsUpdate(true));
   };
-
-  componentDidMount() {
-    this.onRegionsUpdate(true);
-    window.addEventListener('resize', this.onRegionsUpdate);
-  }
-
-  componentWillUnmount() {
-    window.removeEventListener('resize', this.onRegionsUpdate);
-  }
-
-  componentDidUpdate() {
-    this.onRegionsUpdate();
-  }
 
   onRegionsMount = (regionsRef, regionsInnerRef) => {
     this.regionsRef = regionsRef;
