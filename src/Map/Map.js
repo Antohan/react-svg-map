@@ -92,7 +92,7 @@ class Map extends PureComponent {
     const { onZoomInClick, scaleDelta } = this.props;
     const { scale } = this.state;
 
-    const newScale = scale + scaleDelta;
+    const newScale = Math.round((scale + scale * scaleDelta) * 100) / 100;
 
     if (onZoomInClick) onZoomInClick(newScale);
     this.setState({ scale: newScale, lastScale: scale }, this.onRegionsUpdate);
@@ -103,7 +103,7 @@ class Map extends PureComponent {
     const { scale } = this.state;
     if (scale - scaleDelta < scaleDelta) return;
 
-    const newScale = scale - scaleDelta;
+    const newScale = Math.round((scale - scale * scaleDelta) * 100) / 100;
 
     if (onZoomOutClick) onZoomOutClick(newScale);
     this.setState({ scale: newScale, lastScale: scale }, this.onRegionsUpdate);
@@ -164,18 +164,16 @@ class Map extends PureComponent {
     const innerY = -regionsInnerBBox.y;
     regionsInnerElement.setAttribute('transform', `translate(${innerX} ${innerY})`);
 
-    if (!maximize) {
-      const outerX = wrapRect.width / 2 - (regionsInnerRect.width / 2) / lastScale;
-      const outerY = wrapRect.height / 2 - (regionsInnerRect.height / 2) / lastScale;
+    const outerX = wrapRect.width / 2 - (regionsInnerRect.width / 2) / lastScale;
+    const outerY = wrapRect.height / 2 - (regionsInnerRect.height / 2) / lastScale;
 
+    if (!maximize) {
       regionsElement.setAttribute('transform', `scale(${scale})translate(${outerX} ${outerY})`);
       this.setState({ lastScale: scale }, this.updateRegionStroke);
     } else {
       const maxScaleX = Math.floor(wrapRect.width / regionsInnerRect.width);
       const maxScaleY = Math.floor(wrapRect.height / regionsInnerRect.height);
       const maxScale = Math.max(Math.min(maxScaleX, maxScaleY), lastScale);
-      const outerX = (wrapRect.width / 2 - (regionsInnerRect.width / 2) / lastScale);
-      const outerY = (wrapRect.height / 2 - (regionsInnerRect.height / 2) / lastScale);
 
       regionsElement.setAttribute('transform', `scale(${maxScale})translate(${outerX} ${outerY})`);
       this.setState({ scale: maxScale, lastScale: maxScale }, this.updateRegionStroke);
