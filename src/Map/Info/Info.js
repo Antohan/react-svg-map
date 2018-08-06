@@ -44,19 +44,26 @@ class Info extends PureComponent {
 
   wrapRef = React.createRef();
 
+  theme = {};
+
   currentTheme = () => {
-    const { theme } = this.props;
     const { hover } = this.state;
     let current = 'normal';
     if (hover) current = 'hover';
 
-    const merged = innerMerge(
-      {},
-      get(defaultTheme, `Map.Info.${current}`, {}),
-      get(theme, `Map.Info.${current}`, {}),
-    );
+    if (!this.theme[current]) {
+      const { theme } = this.props;
 
-    return getThemeAsPlainObjectByKeys(merged);
+      const merged = innerMerge(
+        {},
+        get(defaultTheme, `Map.Info.${current}`, {}),
+        get(theme, `Map.Info.${current}`, {}),
+      );
+
+      this.theme[current] = getThemeAsPlainObjectByKeys(merged);
+    }
+
+    return this.theme[current];
   };
 
   componentDidMount() {

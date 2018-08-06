@@ -27,23 +27,29 @@ class ZoomIn extends PureComponent {
     hover: false,
   };
 
-  onMouseEnter = () => this.setState({ hover: true });
-
-  onMouseLeave = () => this.setState({ hover: false });
+  theme = {};
 
   currentTheme = () => {
-    const { theme } = this.props;
     const { hover } = this.state;
     const current = hover ? 'hover' : 'normal';
 
-    const merged = innerMerge(
-      {},
-      get(defaultTheme, `Map.Controls.ZoomIn.${current}`, {}),
-      get(theme, `Map.Controls.ZoomIn.${current}`, {}),
-    );
+    if (!this.theme[current]) {
+      const { theme } = this.props;
+      const merged = innerMerge(
+        {},
+        get(defaultTheme, `Map.Controls.ZoomIn.${current}`, {}),
+        get(theme, `Map.Controls.ZoomIn.${current}`, {}),
+      );
 
-    return getThemeAsPlainObjectByKeys(merged);
+      this.theme[current] = getThemeAsPlainObjectByKeys(merged);
+    }
+
+    return this.theme[current];
   };
+
+  onMouseEnter = () => this.setState({ hover: true });
+
+  onMouseLeave = () => this.setState({ hover: false });
 
   render() {
     const { positionCenter, onClick } = this.props;

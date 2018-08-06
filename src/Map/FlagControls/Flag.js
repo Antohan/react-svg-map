@@ -29,6 +29,26 @@ class Flag extends PureComponent {
     hover: false,
   };
 
+  theme = {};
+
+  currentTheme = () => {
+    const { hover } = this.state;
+    const current = hover ? 'hover' : 'normal';
+
+    if (!this.theme[current]) {
+      const { theme } = this.props;
+      const merged = innerMerge(
+        {},
+        get(defaultTheme, `Map.Controls.Flag.${current}`, {}),
+        get(theme, `Map.Controls.Flag.${current}`, {}),
+      );
+
+      this.theme[current] = getThemeAsPlainObjectByKeys(merged);
+    }
+
+    return this.theme[current];
+  };
+
   onMouseEnter = () => this.setState({ hover: true });
 
   onMouseLeave = () => this.setState({ hover: false });
@@ -36,20 +56,6 @@ class Flag extends PureComponent {
   onClick = (e) => {
     const { onClick } = this.props;
     if (onClick) onClick(e);
-  };
-
-  currentTheme = () => {
-    const { theme } = this.props;
-    const { hover } = this.state;
-    const current = hover ? 'hover' : 'normal';
-
-    const merged = innerMerge(
-      {},
-      get(defaultTheme, `Map.Controls.Flag.${current}`, {}),
-      get(theme, `Map.Controls.Flag.${current}`, {}),
-    );
-
-    return getThemeAsPlainObjectByKeys(merged);
   };
 
   render() {

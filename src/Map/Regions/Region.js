@@ -31,10 +31,32 @@ class Region extends PureComponent {
 
   wrapRef = React.createRef();
 
+  theme = {};
+
   componentDidMount() {
     const { id, onMount } = this.props;
     if (onMount) onMount({ id, ref: this.wrapRef });
   }
+
+  currentTheme = () => {
+    const { theme, isActive } = this.props;
+    const { hover } = this.state;
+    let current = 'normal';
+    if (hover) current = 'hover';
+    if (isActive) current = 'active';
+
+    if (!this.theme[current]) {
+      const merged = innerMerge(
+        {},
+        get(defaultTheme, `Map.Region.${current}`, {}),
+        get(theme, `Map.Region.${current}`, {}),
+      );
+
+      this.theme[current] = getThemeAsPlainObjectByKeys(merged);
+    }
+
+    return this.theme[current];
+  };
 
   onClick = () => {
     const { onClick, id } = this.props;
@@ -46,23 +68,6 @@ class Region extends PureComponent {
   onMouseEnter = () => this.setState({ hover: true });
 
   onMouseLeave = () => this.setState({ hover: false });
-
-  currentTheme = () => {
-    const { theme, isActive } = this.props;
-    const { hover } = this.state;
-    let current = 'normal';
-    if (hover) current = 'hover';
-    if (isActive) current = 'active';
-
-    const merged = innerMerge(
-      {},
-      get(defaultTheme, `Map.Region.${current}`, {}),
-      get(theme, `Map.Region.${current}`, {}),
-    );
-
-    return getThemeAsPlainObjectByKeys(merged);
-  };
-
 
   render() {
     const { path: d } = this.props;

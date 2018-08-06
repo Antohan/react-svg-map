@@ -1,6 +1,8 @@
 const defaultTheme = {
   Map: {
     backgroundFill: '#212c42',
+    verticalLines: 7,
+    horizontalLines: 2,
     Region: {
       normal: {
         fill: '#435166',
@@ -20,7 +22,7 @@ const defaultTheme = {
         backgroundFillLow: '#7ac84f',
         backgroundFillMedium: '#65d7d2',
         backgroundFillHigh: '#fc7752',
-        radius: '20.5',
+        radius: 20.5,
         titleColor: '#FFF',
         titleSize: '15px',
         percentColor: '#FFF',
@@ -30,7 +32,7 @@ const defaultTheme = {
         backgroundFillLow: '#7ac84f',
         backgroundFillMedium: '#65d7d2',
         backgroundFillHigh: '#fc7752',
-        radius: '20.5',
+        radius: 20.5,
         titleColor: '#FFF',
         titleSize: '15px',
         percentColor: '#FFF',
@@ -42,38 +44,38 @@ const defaultTheme = {
         normal: {
           backgroundFill: '#fff',
           signFill: '#212c42',
-          radius: '21',
+          radius: 21,
         },
         hover: {
           backgroundFill: '#fff',
           signFill: '#212c42',
-          radius: '21',
+          radius: 21,
         },
       },
       ZoomIn: {
         normal: {
           backgroundFill: '#fff',
           signFill: '#212c42',
-          radius: '21',
+          radius: 21,
         },
         hover: {
           backgroundFill: '#fff',
           signFill: '#212c42',
-          radius: '21',
+          radius: 21,
         },
       },
       Flag: {
         normal: {
           backgroundFill: '#fff',
           signFill: '#212c42',
-          radius: '21',
+          radius: 21,
           counterFill: '#2aa0f5',
           counterColor: '#fff',
         },
         hover: {
           backgroundFill: '#fff',
           signFill: '#212c42',
-          radius: '21',
+          radius: 21,
           counterFill: '#2aa0f5',
           counterColor: '#fff',
         },

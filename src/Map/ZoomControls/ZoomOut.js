@@ -27,6 +27,26 @@ class ZoomOut extends PureComponent {
     hover: false,
   };
 
+  theme = {};
+
+  currentTheme = () => {
+    const { hover } = this.state;
+    const current = hover ? 'hover' : 'normal';
+
+    if (!this.theme[current]) {
+      const { theme } = this.props;
+      const merged = innerMerge(
+        {},
+        get(defaultTheme, `Map.Controls.ZoomOut.${current}`, {}),
+        get(theme, `Map.Controls.ZoomOut.${current}`, {}),
+      );
+
+      this.theme[current] = getThemeAsPlainObjectByKeys(merged);
+    }
+
+    return this.theme[current];
+  };
+
   onMouseEnter = () => this.setState({ hover: true });
 
   onMouseLeave = () => this.setState({ hover: false });
@@ -34,20 +54,6 @@ class ZoomOut extends PureComponent {
   onClick = (e) => {
     const { onClick } = this.props;
     if (onClick) onClick(e);
-  };
-
-  currentTheme = () => {
-    const { theme } = this.props;
-    const { hover } = this.state;
-    const current = hover ? 'hover' : 'normal';
-
-    const merged = innerMerge(
-      {},
-      get(defaultTheme, `Map.Controls.ZoomOut.${current}`, {}),
-      get(theme, `Map.Controls.ZoomOut.${current}`, {}),
-    );
-
-    return getThemeAsPlainObjectByKeys(merged);
   };
 
   render() {

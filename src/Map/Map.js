@@ -1,6 +1,7 @@
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import styled, { withTheme, ThemeProvider } from 'styled-components';
+import get from 'lodash/get';
 
 import { innerMerge, getThemeAsPlainObjectByKeys } from '../utils';
 import { defaultTheme } from '../theme/index';
@@ -10,6 +11,7 @@ import { ZoomControls } from './ZoomControls/index';
 import { FlagControls } from './FlagControls/index';
 import { Regions } from './Regions/index';
 import Informations from './Info/Informations';
+import Background from './Background';
 
 
 const Wrap = styled.div`
@@ -68,11 +70,22 @@ class Map extends PureComponent {
 
   regionRefs = [];
 
-  currentTheme = () => {
-    const { theme } = this.props;
+  theme = null;
 
-    const merged = innerMerge({}, defaultTheme.Map, (theme && theme.Map) || {});
-    return getThemeAsPlainObjectByKeys(merged);
+  currentTheme = () => {
+    if (!this.theme) {
+      const { theme } = this.props;
+
+      const merged = innerMerge(
+        {},
+        get(defaultTheme, 'Map', {}),
+        get(theme, 'Map', {}),
+      );
+
+      this.theme = getThemeAsPlainObjectByKeys(merged);
+    }
+
+    return this.theme;
   };
 
   onZoomInClick = () => {
@@ -219,6 +232,8 @@ class Map extends PureComponent {
     return (
       <ThemeProvider theme={theme}>
         <Wrap {...this.currentTheme()} innerRef={this.wrapRef}>
+          <Background />
+
           <Regions
             data={map}
             currentId={region}
