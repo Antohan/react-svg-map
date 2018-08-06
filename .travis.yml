@@ -1,0 +1,29 @@
+sudo: false
+
+language: node_js
+node_js:
+  - 8
+
+before_install:
+  - npm install codecov.io coveralls
+  - npm i -g makeshift && makeshift -s @crpt -r registry.npmjs.org
+
+after_success:
+  - cat ./coverage/lcov.info | ./node_modules/codecov.io/bin/codecov.io.js
+  - cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js
+  - yarn build
+
+branches:
+  only:
+    - master
+
+deploy:
+  provider: npm
+  skip_cleanup: true
+  email: nikitosgroover@gmail.com
+  api_key: $NPM_TOKEN
+  tag: latest
+  on:
+    repo: crptteam/react-map
+
+
