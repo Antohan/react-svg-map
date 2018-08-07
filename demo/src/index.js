@@ -21,14 +21,22 @@ const theme = {
         backgroundFillHigh: '#00f',
       },
     },
+    Region: {
+      hover: {
+        fill: '#990',
+      },
+      active: {
+        fill: '#099',
+      },
+    },
   },
-
 };
 
 
 class Demo extends Component {
   state = {
     info: initialInfo,
+    region: 'RF',
   };
 
   componentDidMount() {
@@ -36,8 +44,13 @@ class Demo extends Component {
     setTimeout(() => this.setState({ info: [...info, { percent: 80, region: 'CFO' }] }), 2000);
   }
 
+  onRegionClick = (region) => {
+    this.setState({ region: region.id });
+    console.log(region);
+  };
+
   render() {
-    const { info } = this.state;
+    const { info, region } = this.state;
 
     return (
       <div style={{ width: '100%', height: '200px' }}>
@@ -45,13 +58,15 @@ class Demo extends Component {
           react-map Demo
         </h1>
         <div style={{ width: '100%', height: '300px' }}>
-          <Map theme={theme} country="russia" region="RF" info={info} favorites={2} scale={1.5} />
-        </div>
-        <div style={{ width: '100%', height: '400px' }}>
-          <Map theme={theme} country="russia" region="CFO" info={info} favorites={2} scale={2} />
-        </div>
-        <div style={{ width: '100%', height: '500px' }}>
-          <Map theme={theme} country="russia" region="DFO" info={info} favorites={2} scale={2.5} />
+          <Map
+            theme={theme}
+            country="russia"
+            region={region}
+            info={info}
+            favorites={2}
+            scale={1.5}
+            onRegionClick={this.onRegionClick}
+          />
         </div>
       </div>
     );

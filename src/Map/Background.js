@@ -71,7 +71,7 @@ class Background extends PureComponent {
 
     return Array(theme.horizontalLines)
       .fill(null)
-      .map((_, i) => (<HorizontalLine top={(i + 1) * deltaY} />));
+      .map((_, i) => (<HorizontalLine key={i} top={(i + 1) * deltaY} />));
   };
 
   renderVerticalLines = () => {
@@ -80,7 +80,7 @@ class Background extends PureComponent {
 
     return Array(theme.verticalLines)
       .fill(null)
-      .map((_, i) => (<VerticalLine left={(i + 1) * deltaY} />));
+      .map((_, i) => (<VerticalLine key={i} left={(i + 1) * deltaY} />));
   };
 
   render() {

@@ -57,7 +57,6 @@ class Map extends PureComponent {
   state = {
     scale: this.props.scale,
     lastScale: 1,
-    region: this.props.region,
   };
 
   wrapRef = React.createRef();
@@ -131,7 +130,7 @@ class Map extends PureComponent {
   onRegionClick = (region) => {
     const { onRegionClick } = this.props;
     if (onRegionClick) onRegionClick(region);
-    this.setState({ region: region.id }, () => this.onRegionsUpdate(true));
+    setTimeout(() => this.onRegionsUpdate(true), 1);
   };
 
   onRegionsMount = (regionsRef, regionsInnerRef) => {
@@ -222,8 +221,13 @@ class Map extends PureComponent {
   };
 
   render() {
-    const { favorites, info, country, theme } = this.props;
-    const { region } = this.state;
+    const {
+      favorites,
+      info,
+      country,
+      theme,
+      region,
+    } = this.props;
     const map = Maps[country];
     if (!map) return (null);
 

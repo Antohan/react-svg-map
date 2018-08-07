@@ -11,13 +11,16 @@ export default class District extends PureComponent {
     region: PropTypes.object.isRequired,
     onClick: PropTypes.func,
     onMount: PropTypes.func.isRequired,
+    checkHover: PropTypes.bool,
   };
 
   static defaultProps = {
     onClick: undefined,
+    checkHover: false,
   };
 
   state = {
+    hover: false,
     active: false,
   };
 
@@ -28,7 +31,19 @@ export default class District extends PureComponent {
     if (onMount) onMount({ id: region.id, ref: this.wrapRef });
   }
 
-  onClick = (target) => {
+  onMouseEnter = () => this.setState({ hover: true });
+
+  onMouseLeave = () => this.setState({ hover: false });
+
+  onClick = () => {
+    const { region } = this.props;
+    const rect = this.wrapRef.current.getBoundingClientRect();
+
+    this.onRegionClick({ id: region.id, rect });
+    this.setState(oldState => ({ active: !oldState.active }));
+  };
+
+  onRegionClick = (target) => {
     const { onClick, region } = this.props;
     const rect = this.wrapRef.current.getBoundingClientRect();
     if (onClick) {
@@ -36,13 +51,11 @@ export default class District extends PureComponent {
         id: region.id, rect, target,
       });
     }
-
-    this.setState(oldState => ({ active: !oldState.active }));
   };
 
   renderChildren = (child) => {
-    const { data, onClick, onMount } = this.props;
-    const { active } = this.state;
+    const { data, onClick, onMount, checkHover } = this.props;
+    const { hover, active } = this.state;
 
     const region = data.find(r => r.id === child);
     if (!region) return (null);
@@ -55,6 +68,7 @@ export default class District extends PureComponent {
           region={region}
           onClick={onClick}
           onMount={onMount}
+          checkHover
         />
       );
     }
@@ -63,15 +77,28 @@ export default class District extends PureComponent {
       <Region
         key={region.id}
         {...region}
-        onClick={this.onClick}
-        active={active}
+        onClick={checkHover ? null : this.onRegionClick}
+        isActive={hover || active}
         onMount={onMount}
       />
     );
   };
 
   render() {
-    const { region } = this.props;
+    const { region, checkHover } = this.props;
+
+    if (checkHover) {
+      return (
+        <g
+          ref={this.wrapRef}
+          onMouseEnter={this.onMouseEnter}
+          onMouseLeave={this.onMouseLeave}
+          onClick={this.onClick}
+        >
+          {region.children.map(this.renderChildren)}
+        </g>
+      );
+    }
 
     return (
       <g ref={this.wrapRef}>
