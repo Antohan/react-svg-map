@@ -14,7 +14,10 @@
   "scripts": {
     "build": "nwb build-react-component  --copy-files",
     "clean": "nwb clean-module && nwb clean-demo",
-    "start": "nwb serve-react-demo"
+    "start": "nwb serve-react-demo",
+    "test": "NODE_ENV=test jest --no-cache -u",
+    "test:coverage": "NODE_ENV=test jest --coverage",
+    "test:watch": "NODE_ENV=test jest --watch"
   },
   "publishConfig": {
     "access": "public"
