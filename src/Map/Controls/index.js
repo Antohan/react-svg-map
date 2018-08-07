@@ -1,10 +1,12 @@
-import ZoomControls from './ZoomControls';
+import Controls from './Controls';
 import ZoomIn from './ZoomIn';
 import ZoomOut from './ZoomOut';
+import Flag from './Flag';
 
 
 export {
-  ZoomControls,
+  Controls,
   ZoomIn,
   ZoomOut,
+  Flag,
 };

@@ -53,11 +53,11 @@ class Demo extends Component {
     const { info, region } = this.state;
 
     return (
-      <div style={{ width: '100%', height: '200px' }}>
+      <div style={{ width: '100%', height: '700px' }}>
         <h1>
           react-map Demo
         </h1>
-        <div style={{ width: '100%', height: '300px' }}>
+        <div style={{ width: '100%', height: '600px' }}>
           <Map
             theme={theme}
             country="russia"

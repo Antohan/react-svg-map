@@ -64,29 +64,52 @@ class ZoomOut extends PureComponent {
     const translateY = positionCenter.y - size / 2;
 
     return (
-      <g transform={`translate(${translateX} ${translateY})`}>
-        <svg width={size} height={size} viewBox="0 0 44 44">
+      <g transform={`translate(${translateX - 2} ${translateY})`}>
+        <svg width={size} height={size} viewBox="0 0 50 50">
           <g
             onMouseEnter={this.onMouseEnter}
             onMouseLeave={this.onMouseLeave}
             onClick={this.onClick}
             transform="translate(1 1)"
+            filter="url(#filter_zoomout)"
           >
             <circle
-              cx="21"
-              cy="21"
-              r="21"
+              cx="20"
+              cy="20"
+              r="20"
               fill={theme.backgroundFill}
-              stroke={theme.signFill}
               strokeWidth="1"
+              transform="translate(4 3)"
             />
             <path
               fillRule="evenodd"
               clipRule="evenodd"
-              d="M 17 20 H 25 V 22 H 17 Z"
+              d="M 15 19 H 25 V 21 H 15 Z"
               fill={theme.signFill}
+              transform="translate(4 3)"
             />
           </g>
+          <defs>
+            <filter
+              id="filter_zoomout"
+              x="0" y="0"
+              width="50" height="50"
+              filterUnits="userSpaceOnUse"
+              colorInterpolationFilters="sRGB"
+            >
+              <feFlood floodOpacity="0" result="BackgroundImageFix" />
+              <feColorMatrix
+                in="SourceAlpha"
+                type="matrix"
+                values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 255 0"
+              />
+              <feOffset dx="1" dy="2" />
+              <feGaussianBlur stdDeviation="2.5" />
+              <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0" />
+              <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow" />
+              <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow" result="shape" />
+            </filter>
+          </defs>
         </svg>
       </g>
     );

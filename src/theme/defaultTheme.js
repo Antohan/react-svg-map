@@ -44,38 +44,38 @@ const defaultTheme = {
         normal: {
           backgroundFill: '#fff',
           signFill: '#212c42',
-          radius: 21,
+          radius: 20,
         },
         hover: {
           backgroundFill: '#fff',
           signFill: '#212c42',
-          radius: 21,
+          radius: 20,
         },
       },
       ZoomIn: {
         normal: {
           backgroundFill: '#fff',
           signFill: '#212c42',
-          radius: 21,
+          radius: 20,
         },
         hover: {
           backgroundFill: '#fff',
           signFill: '#212c42',
-          radius: 21,
+          radius: 20,
         },
       },
       Flag: {
         normal: {
           backgroundFill: '#fff',
           signFill: '#212c42',
-          radius: 21,
+          radius: 26,
           counterFill: '#2aa0f5',
           counterColor: '#fff',
         },
         hover: {
           backgroundFill: '#fff',
           signFill: '#212c42',
-          radius: 21,
+          radius: 26,
           counterFill: '#2aa0f5',
           counterColor: '#fff',
         },

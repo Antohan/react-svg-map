@@ -60,33 +60,57 @@ class ZoomIn extends PureComponent {
 
     return (
       <g transform={`translate(${translationX} ${translationY})`} onClick={onClick}>
-        <svg width={size} height={size} viewBox="0 0 44 44">
+        <svg width={size} height={size} viewBox="0 0 50 50">
           <g
             onMouseEnter={this.onMouseEnter}
             onMouseLeave={this.onMouseLeave}
             transform="translate(1 1)"
+            filter="url(#filter_zoomin)"
           >
             <circle
-              cx="21"
-              cy="21"
-              r="21"
+              cx="20"
+              cy="20"
+              r="20"
               fill={theme.backgroundFill}
-              stroke={theme.signFill}
               strokeWidth="1"
+              transform="translate(4 3)"
             />
             <path
               fillRule="evenodd"
               clipRule="evenodd"
-              d="M 16 20 H 26 V 22 H 16 Z"
+              d="M 15 19 H 25 V 21 H 15 Z"
               fill={theme.signFill}
+              transform="translate(4 3)"
             />
             <path
               fillRule="evenodd"
               clipRule="evenodd"
-              d="M 20 16 V 26 H 22 V 16 Z"
+              d="M 19 15 V 25 H 21 V 15 Z"
               fill={theme.signFill}
+              transform="translate(4 3)"
             />
           </g>
+          <defs>
+            <filter
+              id="filter_zoomin"
+              x="0" y="0"
+              width="50" height="50"
+              filterUnits="userSpaceOnUse"
+              colorInterpolationFilters="sRGB"
+            >
+              <feFlood floodOpacity="0" result="BackgroundImageFix" />
+              <feColorMatrix
+                in="SourceAlpha"
+                type="matrix"
+                values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 255 0"
+              />
+              <feOffset dx="1" dy="2" />
+              <feGaussianBlur stdDeviation="2.5" />
+              <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0" />
+              <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow" />
+              <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow" result="shape" />
+            </filter>
+          </defs>
         </svg>
       </g>
     );

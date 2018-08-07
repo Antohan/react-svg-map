@@ -4,12 +4,11 @@ import styled, { withTheme, ThemeProvider } from 'styled-components';
 import get from 'lodash/get';
 
 import { innerMerge, getThemeAsPlainObjectByKeys } from '../utils';
-import { defaultTheme } from '../theme/index';
+import { defaultTheme } from '../theme';
 
-import * as Maps from './Data/index';
-import { ZoomControls } from './ZoomControls/index';
-import { FlagControls } from './FlagControls/index';
-import { Regions } from './Regions/index';
+import * as Maps from './Data';
+import { Controls } from './Controls';
+import { Regions } from './Regions';
 import Informations from './Info/Informations';
 import Background from './Background';
 
@@ -101,34 +100,34 @@ class Map extends PureComponent {
   };
 
   onZoomInClick = () => {
-    const { onZoomInClick, scaleDelta } = this.props;
-    const { scale } = this.state;
+    const { onZoomInClick, scaleDelta, } = this.props;
+    const { scale, } = this.state;
 
     const newScale = Math.round((scale + scale * scaleDelta) * 100) / 100;
 
     if (onZoomInClick) onZoomInClick(newScale);
-    this.setState({ scale: newScale, lastScale: scale }, this.onRegionsUpdate);
+    this.setState({ scale: newScale, lastScale: scale, }, this.onRegionsUpdate);
   };
 
   onZoomOutClick = () => {
-    const { onZoomOutClick, scaleDelta } = this.props;
-    const { scale } = this.state;
+    const { onZoomOutClick, scaleDelta, } = this.props;
+    const { scale, } = this.state;
     if (scale - scaleDelta < scaleDelta) return;
 
     const newScale = Math.round((scale - scale * scaleDelta) * 100) / 100;
 
     if (onZoomOutClick) onZoomOutClick(newScale);
-    this.setState({ scale: newScale, lastScale: scale }, this.onRegionsUpdate);
+    this.setState({ scale: newScale, lastScale: scale, }, this.onRegionsUpdate);
   };
 
   onFlagClick = () => {
-    const { onFlagClick } = this.props;
+    const { onFlagClick, } = this.props;
     if (onFlagClick) onFlagClick();
     this.onRegionsUpdate();
   };
 
   onRegionClick = (region) => {
-    const { onRegionClick } = this.props;
+    const { onRegionClick, } = this.props;
     if (onRegionClick) onRegionClick(region);
     setTimeout(() => this.onRegionsUpdate(true), 1);
   };
@@ -138,7 +137,7 @@ class Map extends PureComponent {
     this.regionsInnerRef = regionsInnerRef;
   };
 
-  onRegionMount = ({ id, ref }) => {
+  onRegionMount = ({ id, ref, }) => {
     this.regionRefs[id] = ref;
   };
 
@@ -150,7 +149,7 @@ class Map extends PureComponent {
    * Отцентровка карты в зависимости от видимого региона
    */
   onRegionsUpdate = (maximize = false) => {
-    const { scale, lastScale } = this.state;
+    const { scale, lastScale, } = this.state;
 
     const regionsElement = this.regionsRef.current;
     const regionsInnerElement = this.regionsInnerRef.current;
@@ -162,27 +161,28 @@ class Map extends PureComponent {
     const innerX = -regionsInnerBBox.x;
     const innerY = -regionsInnerBBox.y;
     regionsInnerElement.setAttribute('transform', `translate(${innerX} ${innerY})`);
+    regionsElement.setAttribute('height', wrapRect.height - 50);
 
     const outerX = wrapRect.width / 2 - (regionsInnerRect.width / 2) / lastScale;
-    const outerY = wrapRect.height / 2 - (regionsInnerRect.height / 2) / lastScale;
+    const outerY = (wrapRect.height - 50) / 2 - (regionsInnerRect.height / 2) / lastScale;
 
     if (!maximize) {
       regionsElement.setAttribute('transform', `scale(${scale})translate(${outerX} ${outerY})`);
-      this.setState({ lastScale: scale }, this.updateRegionStroke);
+      this.setState({ lastScale: scale, }, this.updateRegionStroke);
     } else {
       const maxScaleX = Math.floor(wrapRect.width / regionsInnerRect.width);
-      const maxScaleY = Math.floor(wrapRect.height / regionsInnerRect.height);
+      const maxScaleY = Math.floor((wrapRect.height - 50) / regionsInnerRect.height);
       const maxScale = Math.max(Math.min(maxScaleX, maxScaleY), lastScale);
 
       regionsElement.setAttribute('transform', `scale(${maxScale})translate(${outerX} ${outerY})`);
-      this.setState({ scale: maxScale, lastScale: maxScale }, this.updateRegionStroke);
+      this.setState({ scale: maxScale, lastScale: maxScale, }, this.updateRegionStroke);
     }
 
     this.updateInfoPosition();
   };
 
   updateRegionStroke = () => {
-    const { scale } = this.state;
+    const { scale, } = this.state;
     const regions = this.regionsRef.current;
     regions.querySelectorAll('path').forEach((p) => {
       p.setAttribute('stroke-width', 1 / scale);
@@ -197,7 +197,7 @@ class Map extends PureComponent {
     const wrapElement = this.wrapRef.current;
     const wrapRect = wrapElement.getBoundingClientRect();
 
-    this.infoRefs.forEach(({ id, ref }) => {
+    this.infoRefs.forEach(({ id, ref, }) => {
       const infoNode = ref.current;
       const regionRef = this.regionRefs[id];
       if (!regionRef || !regionRef.current) {
@@ -245,8 +245,12 @@ class Map extends PureComponent {
           />
 
           <Informations data={info} regions={map} onInfoMount={this.onInfoMount} />
-          <ZoomControls onZoomInClick={this.onZoomInClick} onZoomOutClick={this.onZoomOutClick} />
-          <FlagControls onFlagClick={this.onFlagClick} favorites={favorites} />
+          <Controls
+            onZoomInClick={this.onZoomInClick}
+            onZoomOutClick={this.onZoomOutClick}
+            onFlagClick={this.onFlagClick}
+            favorites={favorites}
+          />
         </Wrap>
       </ThemeProvider>
     );

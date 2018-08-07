@@ -65,23 +65,24 @@ class Flag extends PureComponent {
 
     return (
       <g transform={`translate(${positionCenter.x - size / 2} ${positionCenter.y - size / 2})`}>
-        <svg width={size} height={size} viewBox="0 0 44 44">
+        <svg width={size} height={size} viewBox="0 0 62 62">
           <g
             onMouseEnter={this.onMouseEnter}
             onMouseLeave={this.onMouseLeave}
             onClick={this.onClick}
+            filter="url(#filter_flag)"
           >
             <circle
-              cx="22"
-              cy="22"
-              r="21"
+              cx="26"
+              cy="26"
+              r="26"
               fill={theme.backgroundFill}
-              stroke={theme.signFill}
               strokeWidth="1"
+              transform="translate(4 3)"
             />
-            <path fillRule="evenodd" clipRule="evenodd" d="M16 14H30L28 19L30 24H18V31H16V16Z" />
-            <g transform="translate(26 0)">
-              <circle cx="8" cy="8" r="8" fill={theme.counterFill} />
+            <path fillRule="evenodd" clipRule="evenodd" d="M19 19H33L31 23L33 27H21V33H19V19Z" transform="translate(4 3)" />
+            <g transform="translate(44 4)">
+              <circle cx="7" cy="7" r="7" fill={theme.counterFill} />
               {favorites && (
                 <text
                   x="5"
@@ -95,6 +96,27 @@ class Flag extends PureComponent {
               )}
             </g>
           </g>
+          <defs>
+            <filter
+              id="filter_flag"
+              x="0" y="0"
+              width="62" height="62"
+              filterUnits="userSpaceOnUse"
+              colorInterpolationFilters="sRGB"
+            >
+              <feFlood floodOpacity="0" result="BackgroundImageFix" />
+              <feColorMatrix
+                in="SourceAlpha"
+                type="matrix"
+                values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 255 0"
+              />
+              <feOffset dx="1" dy="2" />
+              <feGaussianBlur stdDeviation="2.5" />
+              <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0" />
+              <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow" />
+              <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow" result="shape" />
+            </filter>
+          </defs>
         </svg>
       </g>
     );
