@@ -70,18 +70,18 @@ class Region extends PureComponent {
   onMouseLeave = () => this.setState({ hover: false });
 
   render() {
-    const { path: d } = this.props;
+    const { path: d, id } = this.props;
     const theme = this.currentTheme();
 
     return (
-      <g ref={this.wrapRef}>
-        <path
-          d={d}
-          onMouseEnter={this.onMouseEnter}
-          onMouseLeave={this.onMouseLeave}
-          onClick={this.onClick}
-          {...theme}
-        />
+      <g
+        id={`region-${id}`}
+        ref={this.wrapRef}
+        onMouseEnter={this.onMouseEnter}
+        onMouseLeave={this.onMouseLeave}
+        onClick={this.onClick}
+      >
+        <path d={d} {...theme} />
       </g>
     );
   }
