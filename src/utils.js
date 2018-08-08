@@ -27,3 +27,15 @@ export function innerMerge(obj, ...others) {
 
   return obj;
 }
+
+export function fireEvent(elementId, eventName) {
+  const node = document.getElementById(elementId);
+  if (!node) return;
+
+  if (node.fireEvent) node.fireEvent(`on${eventName}`);
+  else {
+    const event = document.createEvent('Events');
+    event.initEvent(eventName, true, false);
+    node.dispatchEvent(event);
+  }
+}

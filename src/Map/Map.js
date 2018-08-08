@@ -37,25 +37,29 @@ class Map extends PureComponent {
     onZoomOutClick: PropTypes.func,
     onFlagClick: PropTypes.func,
     onRegionClick: PropTypes.func,
+    onInfoClick: PropTypes.func,
   };
 
   static defaultProps = {
     theme: defaultTheme,
     country: 'russia',
     region: 'RF',
-    favorites: undefined,
+    favorites: null,
     info: [],
     scale: 1,
     scaleDelta: 0.1,
-    onZoomInClick: undefined,
-    onZoomOutClick: undefined,
-    onFlagClick: undefined,
-    onRegionClick: undefined,
+    onZoomInClick: null,
+    onZoomOutClick: null,
+    onFlagClick: null,
+    onRegionClick: null,
+    onInfoClick: null,
   };
 
   state = {
     scale: this.props.scale,
     lastScale: 1,
+    region: this.props.region,
+    maximize: this.props.scale === 1,
   };
 
   wrapRef = React.createRef();
@@ -71,7 +75,7 @@ class Map extends PureComponent {
   theme = null;
 
   componentDidMount() {
-    this.onRegionsUpdate(true);
+    this.onRegionsUpdate();
     window.addEventListener('resize', this.onRegionsUpdate);
   }
 
@@ -81,6 +85,18 @@ class Map extends PureComponent {
 
   componentDidUpdate() {
     this.onRegionsUpdate();
+  }
+
+  static getDerivedStateFromProps(props, state) {
+    if (props.region !== state.region) {
+      return {
+        scale: props.scale,
+        lastScale: 1,
+        region: props.region,
+        maximize: props.scale === 1,
+      };
+    }
+    return null;
   }
 
   currentTheme = () => {
@@ -129,7 +145,6 @@ class Map extends PureComponent {
   onRegionClick = (region) => {
     const { onRegionClick, } = this.props;
     if (onRegionClick) onRegionClick(region);
-    setTimeout(() => this.onRegionsUpdate(true), 1);
   };
 
   onRegionsMount = (regionsRef, regionsInnerRef) => {
@@ -148,8 +163,8 @@ class Map extends PureComponent {
   /**
    * Отцентровка карты в зависимости от видимого региона
    */
-  onRegionsUpdate = (maximize = false) => {
-    const { scale, lastScale, } = this.state;
+  onRegionsUpdate = () => {
+    const { scale, lastScale, maximize, } = this.state;
 
     const regionsElement = this.regionsRef.current;
     const regionsInnerElement = this.regionsInnerRef.current;
@@ -175,7 +190,10 @@ class Map extends PureComponent {
       const maxScale = Math.max(Math.min(maxScaleX, maxScaleY), lastScale);
 
       regionsElement.setAttribute('transform', `scale(${maxScale})translate(${outerX} ${outerY})`);
-      this.setState({ scale: maxScale, lastScale: maxScale, }, this.updateRegionStroke);
+      this.setState(
+        { scale: maxScale, lastScale: maxScale, maximize: false, },
+        this.updateRegionStroke
+      );
     }
 
     this.updateInfoPosition();
@@ -211,7 +229,7 @@ class Map extends PureComponent {
       const x = regionRect.x + regionRect.width / 2;
       const y = regionRect.y + regionRect.height / 2;
 
-      const infoRect = infoNode.getBoundingClientRect();
+      const infoRect = infoNode.querySelector('svg').getBoundingClientRect();
       const offsetX = wrapRect.x + infoRect.height / 2;
       const offsetY = wrapRect.y + infoRect.height / 2;
 
@@ -227,6 +245,7 @@ class Map extends PureComponent {
       country,
       theme,
       region,
+      onInfoClick,
     } = this.props;
     const map = Maps[country];
     if (!map) return (null);
@@ -244,7 +263,12 @@ class Map extends PureComponent {
             onRegionMount={this.onRegionMount}
           />
 
-          <Informations data={info} regions={map} onInfoMount={this.onInfoMount} />
+          <Informations
+            data={info}
+            regions={map}
+            onInfoMount={this.onInfoMount}
+            onInfoClick={onInfoClick}
+          />
           <Controls
             onZoomInClick={this.onZoomInClick}
             onZoomOutClick={this.onZoomOutClick}

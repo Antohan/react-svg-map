@@ -91,6 +91,7 @@ export default class District extends PureComponent {
       return (
         <g
           ref={this.wrapRef}
+          id={`region-${region.id}`}
           onMouseEnter={this.onMouseEnter}
           onMouseLeave={this.onMouseLeave}
           onClick={this.onClick}
@@ -101,7 +102,7 @@ export default class District extends PureComponent {
     }
 
     return (
-      <g ref={this.wrapRef}>
+      <g ref={this.wrapRef} id={`region-${region.id}`}>
         {region.children.map(this.renderChildren)}
       </g>
     );
