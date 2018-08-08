@@ -69,6 +69,7 @@ class Demo extends Component {
             favorites={2}
             onRegionClick={this.onRegionClick}
             onFlagClick={this.onFlagClick}
+            onInfoClick={e => console.log(e)}
           />
         </div>
       </div>

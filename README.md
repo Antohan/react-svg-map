@@ -35,7 +35,7 @@ import Map, { THEMES } from "@crpt/react-map";
 | onZoomOutClick: Function | Callback for ZoomOut control. Receives new scale. | `<Map onZoomOutClick={scale => console.log(scale)} />` |
 | onFlagClick: Function | Callback for Flag control. | `<Map onFlagClick={() => console.log('Flag clicked')} />` |
 | onRegionClick: Function | Callback on map Region click. Note2 | `<Map onRegionClick={region => console.log(region.id)} />` |
-
+| onInfoClick: Function | Callback on Info click. Receives region ID | `<Map onInfoClick={region => console.log(region)>` |
 
 __Note1__. info - array of objects
 ```javascript
