@@ -46,7 +46,10 @@ class Demo extends Component {
 
   onRegionClick = (region) => {
     this.setState({ region: region.id });
-    console.log(region);
+  };
+
+  onFlagClick = () => {
+    this.setState({ region: 'RF' });
   };
 
   render() {
@@ -64,8 +67,8 @@ class Demo extends Component {
             region={region}
             info={info}
             favorites={2}
-            scale={1.5}
             onRegionClick={this.onRegionClick}
+            onFlagClick={this.onFlagClick}
           />
         </div>
       </div>

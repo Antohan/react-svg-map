@@ -56,6 +56,8 @@ class Map extends PureComponent {
   state = {
     scale: this.props.scale,
     lastScale: 1,
+    region: this.props.region,
+    maximize: this.props.scale === 1,
   };
 
   wrapRef = React.createRef();
@@ -71,7 +73,7 @@ class Map extends PureComponent {
   theme = null;
 
   componentDidMount() {
-    this.onRegionsUpdate(true);
+    this.onRegionsUpdate();
     window.addEventListener('resize', this.onRegionsUpdate);
   }
 
@@ -81,6 +83,18 @@ class Map extends PureComponent {
 
   componentDidUpdate() {
     this.onRegionsUpdate();
+  }
+
+  static getDerivedStateFromProps(props, state) {
+    if (props.region !== state.region) {
+      return {
+        scale: props.scale,
+        lastScale: 1,
+        region: props.region,
+        maximize: props.scale === 1,
+      };
+    }
+    return null;
   }
 
   currentTheme = () => {
@@ -129,7 +143,6 @@ class Map extends PureComponent {
   onRegionClick = (region) => {
     const { onRegionClick, } = this.props;
     if (onRegionClick) onRegionClick(region);
-    setTimeout(() => this.onRegionsUpdate(true), 1);
   };
 
   onRegionsMount = (regionsRef, regionsInnerRef) => {
@@ -148,8 +161,8 @@ class Map extends PureComponent {
   /**
    * Отцентровка карты в зависимости от видимого региона
    */
-  onRegionsUpdate = (maximize = false) => {
-    const { scale, lastScale, } = this.state;
+  onRegionsUpdate = () => {
+    const { scale, lastScale, maximize, } = this.state;
 
     const regionsElement = this.regionsRef.current;
     const regionsInnerElement = this.regionsInnerRef.current;
@@ -175,7 +188,10 @@ class Map extends PureComponent {
       const maxScale = Math.max(Math.min(maxScaleX, maxScaleY), lastScale);
 
       regionsElement.setAttribute('transform', `scale(${maxScale})translate(${outerX} ${outerY})`);
-      this.setState({ scale: maxScale, lastScale: maxScale, }, this.updateRegionStroke);
+      this.setState(
+        { scale: maxScale, lastScale: maxScale, maximize: false, },
+        this.updateRegionStroke
+      );
     }
 
     this.updateInfoPosition();
