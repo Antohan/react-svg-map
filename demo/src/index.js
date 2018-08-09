@@ -7,9 +7,11 @@ import Map from '../../src';
 
 
 const initialInfo = [
-  { percent: 12, region: 'SZFO' },
-  { percent: 31, region: 'RU-AL' },
-  { percent: 53, region: 'RU-SA' },
+  { percents: [12], region: 'SZFO' },
+  { percents: [31, 41], region: 'RU-AL' },
+  { percents: [45, 23, 11], region: 'RU-SA' },
+  { percents: [11, 66, 33, 77], region: 'YFO' },
+  { percents: [], region: 'SFO' },
 ];
 
 const theme = {
@@ -17,8 +19,8 @@ const theme = {
     Info: {
       normal: {
         backgroundFillLow: '#0f0',
-        backgroundFillMedium: '#f00',
-        backgroundFillHigh: '#00f',
+        backgroundFillMedium: '#00f',
+        backgroundFillHigh: '#f00',
       },
     },
     Region: {
@@ -39,17 +41,12 @@ class Demo extends Component {
     region: 'RF',
   };
 
-  componentDidMount() {
-    const { info } = this.state;
-    setTimeout(() => this.setState({ info: [...info, { percent: 80, region: 'CFO' }] }), 2000);
-  }
-
   onRegionClick = (region) => {
-    this.setState({ region: region.id });
+    this.setState({ region: region.id, info: [{ region: region.id, percents: [10,20,30,70] }] });
   };
 
   onFlagClick = () => {
-    this.setState({ region: 'RF' });
+    this.setState({ region: 'RF', info: initialInfo });
   };
 
   render() {
