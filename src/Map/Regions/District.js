@@ -11,6 +11,7 @@ export default class District extends PureComponent {
     region: PropTypes.object.isRequired,
     onClick: PropTypes.func,
     onMount: PropTypes.func.isRequired,
+    onUnmount: PropTypes.func.isRequired,
     checkHover: PropTypes.bool,
   };
 
@@ -28,7 +29,12 @@ export default class District extends PureComponent {
 
   componentDidMount() {
     const { onMount, region } = this.props;
-    if (onMount) onMount({ id: region.id, ref: this.wrapRef });
+    onMount({ id: region.id, ref: this.wrapRef });
+  }
+
+  componentWillUnmount() {
+    const { onUnmount, region } = this.props;
+    onUnmount(region.id);
   }
 
   onMouseEnter = () => this.setState({ hover: true });
@@ -54,7 +60,7 @@ export default class District extends PureComponent {
   };
 
   renderChildren = (child) => {
-    const { data, onClick, onMount, checkHover } = this.props;
+    const { data, onClick, onMount, onUnmount, checkHover } = this.props;
     const { hover, active } = this.state;
 
     const region = data.find(r => r.id === child);
@@ -68,6 +74,7 @@ export default class District extends PureComponent {
           region={region}
           onClick={onClick}
           onMount={onMount}
+          onUnmount={onUnmount}
           checkHover
         />
       );
@@ -80,6 +87,7 @@ export default class District extends PureComponent {
         onClick={checkHover ? null : this.onRegionClick}
         isActive={hover || active}
         onMount={onMount}
+        onUnmount={onUnmount}
       />
     );
   };

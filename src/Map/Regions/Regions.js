@@ -12,6 +12,7 @@ export default class Regions extends Component {
     currentId: PropTypes.string.isRequired,
     onMount: PropTypes.func.isRequired,
     onRegionMount: PropTypes.func.isRequired,
+    onRegionUnmount: PropTypes.func.isRequired,
     onRegionClick: PropTypes.func,
   };
 
@@ -25,7 +26,7 @@ export default class Regions extends Component {
 
   componentDidMount() {
     const { onMount } = this.props;
-    if (onMount) onMount(this.wrapRef, this.childrenRef);
+    onMount(this.wrapRef, this.childrenRef);
   }
 
   render() {
@@ -34,6 +35,7 @@ export default class Regions extends Component {
       currentId,
       onRegionClick,
       onRegionMount,
+      onRegionUnmount,
     } = this.props;
 
     const region = data.find(r => r.id === currentId);
@@ -56,10 +58,17 @@ export default class Regions extends Component {
               region={region}
               onClick={onRegionClick}
               onMount={onRegionMount}
+              onUnmount={onRegionUnmount}
             />
           )}
           {region.path && (
-            <Region key={region.id} {...region} onClick={onRegionClick} onMount={onRegionMount} />
+            <Region
+              key={region.id}
+              {...region}
+              onClick={onRegionClick}
+              onMount={onRegionMount}
+              onUnmount={onRegionUnmount}
+            />
           )}
         </g>
       </svg>

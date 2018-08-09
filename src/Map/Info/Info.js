@@ -41,14 +41,15 @@ class Info extends PureComponent {
     theme: PropTypes.object,
     region: PropTypes.string.isRequired,
     title: PropTypes.string.isRequired,
-    percent: PropTypes.number.isRequired,
-    onMount: PropTypes.func,
+    percents: PropTypes.arrayOf(PropTypes.number),
+    onMount: PropTypes.func.isRequired,
+    onUnmount: PropTypes.func.isRequired,
     onClick: PropTypes.func,
   };
 
   static defaultProps = {
     theme: defaultTheme,
-    onMount: null,
+    percents: [],
     onClick: null,
   };
 
@@ -63,7 +64,36 @@ class Info extends PureComponent {
   componentDidMount() {
     const { onMount, region } = this.props;
     if (onMount) onMount({ id: region, ref: this.wrapRef });
+    this.updatePercents();
   }
+
+  componentWillUnmount() {
+    const { onUnmount, region } = this.props;
+    if (onUnmount) onUnmount(region);
+  }
+
+  componentDidUpdate() {
+    this.updatePercents();
+  }
+
+  updatePercents = () => {
+    const { percents } = this.props;
+
+    if (!percents.length) return;
+
+    percents.forEach((percent, i) => {
+      const circle = this.wrapRef.current.querySelector(`.effect-${i}`);
+      if (!circle) return;
+      const radius = 4 + 4 * i;
+      const circumference = Math.round((Math.PI * (radius * 2) + 0.00001) * 100) / 100;
+      circle.style.strokeDasharray = circumference;
+      circle.style.strokeDashoffset = circumference;
+
+      setTimeout(() => {
+        circle.style.strokeDashoffset = circumference / 100 * (100 - percent);
+      }, 100);
+    });
+  };
 
   currentTheme = () => {
     const { hover } = this.state;
@@ -99,17 +129,65 @@ class Info extends PureComponent {
     else fireEvent(`region-${region}`, 'click');
   };
 
-  get backgroundFill() {
-    const { percent } = this.props;
+  backgroundFill = (percent) => {
     const theme = this.currentTheme();
 
     if (percent <= 33) return theme.backgroundFillLow;
     if (percent <= 66) return theme.backgroundFillMedium;
     return theme.backgroundFillHigh;
-  }
+  };
+
+  renderPercents = () => {
+    const { percents } = this.props;
+
+    if (!percents.length) {
+      return (
+        <circle
+          cx="20.5"
+          cy="20.5"
+          r="10"
+          strokeWidth="3"
+          fill="transparent"
+          stroke="#B8B8B8"
+          strokeOpacity="0.39"
+        />
+      );
+    }
+
+    return percents.map((percent, i) => {
+      const radius = 4 + 4 * i;
+      const circumference = Math.round((Math.PI * (radius * 2) + 0.00001) * 100) / 100;
+
+      return (
+        <React.Fragment key={`percent-${percent}-${i}`}>
+          <circle
+            cx="20.5"
+            cy="20.5"
+            r={radius}
+            strokeWidth="3"
+            fill="transparent"
+            stroke="#B8B8B8"
+            strokeOpacity="0.39"
+          />
+          <circle
+            className={`effect-${i}`}
+            cx="20.5"
+            cy="20.5"
+            r={radius}
+            strokeWidth="3"
+            fill="transparent"
+            stroke={this.backgroundFill(percent)}
+            strokeDasharray={circumference}
+            strokeDashoffset={circumference}
+            style={{ transition: 'stroke-dashoffset 0.4s linear' }}
+          />
+        </React.Fragment>
+      );
+    });
+  };
 
   render() {
-    const { percent, title } = this.props;
+    const { title } = this.props;
     const theme = this.currentTheme();
     const size = theme.radius * 2;
 
@@ -126,20 +204,12 @@ class Info extends PureComponent {
           onMouseLeave={this.onMouseLeave}
           onClick={this.onClick}
         >
-          <g onMouseEnter={this.onInnerMouseEnter} onMouseLeave={this.onInnerMouseLeave}>
-            <circle cx="20.5" cy="20.5" r="15.5" fill={this.backgroundFill} />
-            <circle cx="20.5" cy="20.5" r="18" stroke="#B8B8B8" strokeOpacity="0.39" strokeWidth="5" />
-            <text
-              x="50%"
-              y="50%"
-              textAnchor="middle"
-              alignmentBaseline="central"
-              fill={theme.percentColor}
-              fontSize={theme.percentSize}
-              style={{ cursor: 'default' }}
-            >
-              {percent}%
-            </text>
+          <g
+            onMouseEnter={this.onInnerMouseEnter}
+            onMouseLeave={this.onInnerMouseLeave}
+            transform="rotate(-90)translate(-41 0)"
+          >
+            {this.renderPercents()}
           </g>
         </SvgWrap>
         <TextWrap

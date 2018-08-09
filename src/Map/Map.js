@@ -29,7 +29,10 @@ class Map extends PureComponent {
     theme: PropTypes.object,
     country: PropTypes.string,
     region: PropTypes.string,
-    info: PropTypes.array,
+    info: PropTypes.arrayOf(PropTypes.shape({
+      percents: PropTypes.arrayOf(PropTypes.number.isRequired).isRequired,
+      region: PropTypes.string.isRequired,
+    })),
     favorites: PropTypes.number,
     scale: PropTypes.number,
     scaleDelta: PropTypes.number,
@@ -156,8 +159,16 @@ class Map extends PureComponent {
     this.regionRefs[id] = ref;
   };
 
+  onRegionUnmount = (id) => {
+    delete this.regionRefs[id];
+  };
+
   onInfoMount = (info) => {
     this.infoRefs.push(info);
+  };
+
+  onInfoUnmount = (id) => {
+    this.infoRefs = this.infoRefs.filter(i => i.id !== id);
   };
 
   /**
@@ -261,12 +272,14 @@ class Map extends PureComponent {
             onRegionClick={this.onRegionClick}
             onMount={this.onRegionsMount}
             onRegionMount={this.onRegionMount}
+            onRegionUnmount={this.onRegionUnmount}
           />
 
           <Informations
             data={info}
             regions={map}
             onInfoMount={this.onInfoMount}
+            onInfoUnmount={this.onInfoUnmount}
             onInfoClick={onInfoClick}
           />
           <Controls

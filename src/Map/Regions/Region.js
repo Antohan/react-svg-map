@@ -17,6 +17,7 @@ class Region extends PureComponent {
     path: PropTypes.string.isRequired,
     isActive: PropTypes.bool,
     onMount: PropTypes.func.isRequired,
+    onUnmount: PropTypes.func.isRequired,
   };
 
   static defaultProps = {
@@ -35,7 +36,12 @@ class Region extends PureComponent {
 
   componentDidMount() {
     const { id, onMount } = this.props;
-    if (onMount) onMount({ id, ref: this.wrapRef });
+    onMount({ id, ref: this.wrapRef });
+  }
+
+  componentWillUnmount() {
+    const { id, onUnmount } = this.props;
+    onUnmount(id);
   }
 
   currentTheme = () => {

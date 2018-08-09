@@ -9,17 +9,17 @@ export default class Informations extends PureComponent {
   static propTypes = {
     data: PropTypes.array.isRequired,
     regions: PropTypes.array.isRequired,
-    onInfoMount: PropTypes.func,
+    onInfoMount: PropTypes.func.isRequired,
+    onInfoUnmount: PropTypes.func.isRequired,
     onInfoClick: PropTypes.func,
   };
 
   static defaultProps = {
-    onInfoMount: null,
     onInfoClick: null,
   };
 
   renderInfo = (info) => {
-    const { regions, onInfoMount, onInfoClick } = this.props;
+    const { regions, onInfoMount, onInfoUnmount, onInfoClick } = this.props;
 
     const region = regions.find(r => r.id === info.region);
     if (!region) return (null);
@@ -30,6 +30,7 @@ export default class Informations extends PureComponent {
         {...info}
         title={region.title}
         onMount={onInfoMount}
+        onUnmount={onInfoUnmount}
         onClick={onInfoClick}
       />
     );
