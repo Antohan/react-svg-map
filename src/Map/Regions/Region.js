@@ -68,6 +68,7 @@ class Region extends PureComponent {
         onMouseEnter: this.onMouseEnter,
         onMouseLeave: this.onMouseLeave,
         onClick: this.onClick,
+        ...data.translate && { transform: `translate(${data.translate})` },
       };
 
     return (

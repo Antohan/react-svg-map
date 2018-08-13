@@ -66,13 +66,15 @@ export function getScale(wrapSize, targetSize, precision = 100) {
   return Math.round((scale - scale / 10) * precision) / precision;
 }
 
-export function getPosition([wrapX, wrapY] = [0, 0], [targetX, targetY] = [0, 0]) {
-  let x = Math.floor(Math.abs(wrapX - targetX));
-  let y = Math.floor(Math.abs(wrapY - targetY));
-  if (targetX > wrapX) x *= -1;
-  if (targetY > wrapY) y *= -1;
+export function getPosition([mapX, mapY] = [0, 0], [targetX, targetY] = [0, 0], wrapper) {
+  let x = Math.floor(Math.abs(mapX - targetX));
+  let y = Math.floor(Math.abs(mapY - targetY));
+  if (targetX > mapX) x *= -1;
+  if (targetY > mapY) y *= -1;
 
-  return [x, y];
+  const scale = Math.min(wrapper.width / 2 / mapX, wrapper.height / 2 / mapY);
+
+  return [x * scale, y * scale];
 }
 
 export function getTheme(theme, key) {

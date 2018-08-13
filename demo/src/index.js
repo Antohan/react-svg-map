@@ -66,7 +66,7 @@ class Demo extends Component {
         <h1>
           react-svg-map Demo
         </h1>
-        <div style={{ width: '100%', height: '600px', }}>
+        <div style={{ width: '50%', height: '800px', }}>
           <Map
             theme={theme}
             country="russia"
