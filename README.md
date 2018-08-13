@@ -1,23 +1,23 @@
-# react-map
+# react-svg-map
 
 [![Travis][build-badge]][build]
 [![npm package][npm-badge]][npm]
 [![Coveralls][coveralls-badge]][coveralls]
 
-Map React component.
+SVG Map React component.
 
 ## Install ##
 ```javascript
-npm i --save @crpt/react-map
+npm i --save @crpt/react-svg-map
 ```
 
 ## Usage
 
 ```javascript
 
-import Map, { THEMES } from "@crpt/react-map";
+import Map, { THEMES } from "@crpt/react-svg-map";
 
-<Map country="russia" region="DFO" theme={THEMES.defaultTheme} />
+<Map country="russia" selectedId="DFO" theme={THEMES.defaultTheme} />
 ```
 
 ### Map
@@ -26,11 +26,9 @@ import Map, { THEMES } from "@crpt/react-map";
 |---|---|---|
 | theme: Object | Map theme object. Default: THEMES.defaultTheme | `<Map theme={myCustomTheme} />` |
 | country: String  | Country name. Default: 'russia' |  `<Map country="russia" />` |
-| region: String  | Country region name. Default: 'RF' |  `<Map region="DFO" />` |
+| region: String  | Country region id. Default: 'RF' |  `<Map region="DFO" />` |
 | info: Array  | Map info. Note1. |  `<Map info={[{ percent: 22, region: 'DFO'}]} />` |
 | favorites: Integer | Counter for Flag button | `<Map favorites={2} />` |
-| scale: Float | Map custom scale. Default: 1 | `<Map scale={2.5} />` |
-| scaleDelta: Float | Scale delta for increase/decrease. Default: 0.1 | `<Map scaleDelta={0.5} />` |
 | onZoomInClick: Function | Callback for ZoomIn control. Receives new scale. | `<Map onZoomInClick={scale => console.log(scale)} />` |
 | onZoomOutClick: Function | Callback for ZoomOut control. Receives new scale. | `<Map onZoomOutClick={scale => console.log(scale)} />` |
 | onFlagClick: Function | Callback for Flag control. | `<Map onFlagClick={() => console.log('Flag clicked')} />` |

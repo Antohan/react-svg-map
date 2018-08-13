@@ -1,9 +1,8 @@
-import React, { PureComponent } from 'react';
+import React, { PureComponent, } from 'react';
 import PropTypes from 'prop-types';
-import styled, { withTheme } from 'styled-components';
-import get from 'lodash/get';
-import { innerMerge, getThemeAsPlainObjectByKeys, fireEvent } from '../../utils';
-import { defaultTheme } from '../../theme/index';
+import styled, { withTheme, } from 'styled-components';
+import { fireEvent, getTheme } from '../utils';
+import { defaultTheme, } from '../theme/index';
 
 
 const Wrap = styled.div`
@@ -11,7 +10,7 @@ const Wrap = styled.div`
   align-items: center;
   position: absolute;
   height: 0;
-  top: 0;
+  top: -100px;
   left: 0;
 `;
 
@@ -39,9 +38,8 @@ class Info extends PureComponent {
 
   static propTypes = {
     theme: PropTypes.object,
-    region: PropTypes.string.isRequired,
-    title: PropTypes.string.isRequired,
-    percents: PropTypes.arrayOf(PropTypes.number),
+    region: PropTypes.object.isRequired,
+    percents: PropTypes.arrayOf(PropTypes.number).isRequired,
     onMount: PropTypes.func.isRequired,
     onUnmount: PropTypes.func.isRequired,
     onClick: PropTypes.func,
@@ -49,7 +47,6 @@ class Info extends PureComponent {
 
   static defaultProps = {
     theme: defaultTheme,
-    percents: [],
     onClick: null,
   };
 
@@ -62,22 +59,32 @@ class Info extends PureComponent {
   theme = {};
 
   componentDidMount() {
-    const { onMount, region } = this.props;
-    if (onMount) onMount({ id: region, ref: this.wrapRef });
+    const { region, onMount } = this.props;
+    onMount(region.id, this.wrapRef.current);
     this.updatePercents();
   }
 
   componentWillUnmount() {
-    const { onUnmount, region } = this.props;
-    if (onUnmount) onUnmount(region);
+    const { region, onUnmount } = this.props;
+    onUnmount(region.id);
   }
 
   componentDidUpdate() {
     this.updatePercents();
   }
 
+  currentTheme = () => {
+    const { theme } = this.props;
+    const { hover, } = this.state;
+    let current = 'normal';
+    if (hover) current = 'hover';
+
+    if (!this.theme[current]) this.theme[current] = getTheme(theme, `Map.Info.${current}`);
+    return this.theme[current];
+  };
+
   updatePercents = () => {
-    const { percents } = this.props;
+    const { percents, } = this.props;
 
     if (!percents.length) return;
 
@@ -95,37 +102,19 @@ class Info extends PureComponent {
     });
   };
 
-  currentTheme = () => {
-    const { hover } = this.state;
-    let current = 'normal';
-    if (hover) current = 'hover';
-
-    if (!this.theme[current]) {
-      const { theme } = this.props;
-
-      const merged = innerMerge(
-        {},
-        get(defaultTheme, `Map.Info.${current}`, {}),
-        get(theme, `Map.Info.${current}`, {}),
-      );
-
-      this.theme[current] = getThemeAsPlainObjectByKeys(merged);
-    }
-
-    return this.theme[current];
+  onMouseEnter = () => {
+    const { region } = this.props;
+    fireEvent(`region-${region.id}`, 'mouseover');
   };
 
-  onMouseEnter = () => fireEvent(`region-${this.props.region}`, 'mouseover');
-
-  onMouseLeave = () => fireEvent(`region-${this.props.region}`, 'mouseout');
-
-  onInnerMouseEnter = () => this.setState({ hover: true });
-
-  onInnerMouseLeave = () => this.setState({ hover: false });
+  onMouseLeave = () => {
+    const { region } = this.props;
+    fireEvent(`region-${region.id}`, 'mouseout');
+  };
 
   onClick = () => {
-    const { onClick, region } = this.props;
-    if (onClick) onClick({ id: region });
+    const { onClick, region, } = this.props;
+    if (onClick) onClick({ id: region, });
     else fireEvent(`region-${region}`, 'click');
   };
 
@@ -138,7 +127,7 @@ class Info extends PureComponent {
   };
 
   renderPercents = () => {
-    const { percents } = this.props;
+    const { percents, } = this.props;
 
     if (!percents.length) {
       return (
@@ -179,7 +168,7 @@ class Info extends PureComponent {
             stroke={this.backgroundFill(percent)}
             strokeDasharray={circumference}
             strokeDashoffset={circumference}
-            style={{ transition: 'stroke-dashoffset 0.4s linear' }}
+            style={{ transition: 'stroke-dashoffset 0.4s linear', }}
           />
         </React.Fragment>
       );
@@ -187,7 +176,7 @@ class Info extends PureComponent {
   };
 
   render() {
-    const { title } = this.props;
+    const { region } = this.props;
     const theme = this.currentTheme();
     const size = theme.radius * 2;
 
@@ -204,11 +193,7 @@ class Info extends PureComponent {
           onMouseLeave={this.onMouseLeave}
           onClick={this.onClick}
         >
-          <g
-            onMouseEnter={this.onInnerMouseEnter}
-            onMouseLeave={this.onInnerMouseLeave}
-            transform="rotate(-90)translate(-41 0)"
-          >
+          <g transform="rotate(-90)translate(-41 0)">
             {this.renderPercents()}
           </g>
         </SvgWrap>
@@ -220,7 +205,7 @@ class Info extends PureComponent {
           onMouseLeave={this.onMouseLeave}
           onClick={this.onClick}
         >
-          {title}
+          {region.title}
         </TextWrap>
       </Wrap>
     );

@@ -1,4 +1,4 @@
-import React, { PureComponent } from 'react';
+import React, { PureComponent, } from 'react';
 import PropTypes from 'prop-types';
 import Region from './Region';
 
@@ -7,111 +7,66 @@ export default class District extends PureComponent {
   static displayName = 'District';
 
   static propTypes = {
-    data: PropTypes.array.isRequired,
-    region: PropTypes.object.isRequired,
-    onClick: PropTypes.func,
-    onMount: PropTypes.func.isRequired,
-    onUnmount: PropTypes.func.isRequired,
-    checkHover: PropTypes.bool,
+    data: PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      title: PropTypes.string.isRequired,
+      size: PropTypes.arrayOf(PropTypes.number).isRequired,
+      center: PropTypes.arrayOf(PropTypes.number).isRequired,
+      children: PropTypes.array.isRequired,
+    }),
+    selectedId: PropTypes.string,
+    mapId: PropTypes.string.isRequired,
+    onClick: PropTypes.func.isRequired,
   };
 
   static defaultProps = {
-    onClick: undefined,
-    checkHover: false,
+    selectedId: null,
   };
 
   state = {
     hover: false,
-    active: false,
   };
 
   wrapRef = React.createRef();
 
-  componentDidMount() {
-    const { onMount, region } = this.props;
-    onMount({ id: region.id, ref: this.wrapRef });
-  }
+  onMouseEnter = () => this.setState({ hover: true, });
 
-  componentWillUnmount() {
-    const { onUnmount, region } = this.props;
-    onUnmount(region.id);
-  }
+  onMouseLeave = () => this.setState({ hover: false, });
 
-  onMouseEnter = () => this.setState({ hover: true });
-
-  onMouseLeave = () => this.setState({ hover: false });
-
-  onClick = () => {
-    const { region } = this.props;
+  onClick = (target) => {
+    const { onClick, data } = this.props;
     const rect = this.wrapRef.current.getBoundingClientRect();
-
-    this.onRegionClick({ id: region.id, rect });
-    this.setState(oldState => ({ active: !oldState.active }));
-  };
-
-  onRegionClick = (target) => {
-    const { onClick, region } = this.props;
-    const rect = this.wrapRef.current.getBoundingClientRect();
-    if (onClick) {
-      onClick({
-        id: region.id, rect, target,
-      });
-    }
-  };
-
-  renderChildren = (child) => {
-    const { data, onClick, onMount, onUnmount, checkHover } = this.props;
-    const { hover, active } = this.state;
-
-    const region = data.find(r => r.id === child);
-    if (!region) return (null);
-
-    if (region.children) {
-      return (
-        <District
-          key={region.id}
-          data={data}
-          region={region}
-          onClick={onClick}
-          onMount={onMount}
-          onUnmount={onUnmount}
-          checkHover
-        />
-      );
-    }
-
-    return (
-      <Region
-        key={region.id}
-        {...region}
-        onClick={checkHover ? null : this.onRegionClick}
-        isActive={hover || active}
-        onMount={onMount}
-        onUnmount={onUnmount}
-      />
-    );
+    onClick({ id: data.id, rect, target });
   };
 
   render() {
-    const { region, checkHover } = this.props;
-
-    if (checkHover) {
-      return (
-        <g
-          ref={this.wrapRef}
-          id={`region-${region.id}`}
-          onMouseEnter={this.onMouseEnter}
-          onMouseLeave={this.onMouseLeave}
-          onClick={this.onClick}
-        >
-          {region.children.map(this.renderChildren)}
-        </g>
-      );
-    }
+    const { data, selectedId, mapId } = this.props;
+    const { hover } = this.state;
+    const active = data.id === selectedId;
+    const inactive = (!!selectedId && (selectedId !== mapId)) && !active;
+    const props = inactive
+      ? {}
+      : {
+        onMouseEnter: this.onMouseEnter,
+        onMouseLeave: this.onMouseLeave,
+      };
 
     return (
-      <g ref={this.wrapRef} id={`region-${region.id}`}>
-        {region.children.map(this.renderChildren)}
+      <g
+        id={`region-${data.id}`}
+        ref={this.wrapRef}
+        {...props}
+      >
+        {data.children.map(child => (
+          <Region
+            key={child.id}
+            data={child}
+            selectedId={selectedId}
+            active={active || hover}
+            inactive={inactive}
+            onClick={this.onClick}
+          />
+        ))}
       </g>
     );
   }

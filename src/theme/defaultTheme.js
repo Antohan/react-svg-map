@@ -16,6 +16,10 @@ const defaultTheme = {
         fill: '#435166',
         stroke: '#000',
       },
+      inactive: {
+        fill: 'rgba(255, 255, 0, 0.5)',
+        stroke: '#000',
+      },
     },
     Info: {
       normal: {
@@ -47,7 +51,7 @@ const defaultTheme = {
           radius: 20,
         },
         hover: {
-          backgroundFill: '#fff',
+          backgroundFill: '#999',
           signFill: '#212c42',
           radius: 20,
         },
@@ -59,7 +63,7 @@ const defaultTheme = {
           radius: 20,
         },
         hover: {
-          backgroundFill: '#fff',
+          backgroundFill: '#999',
           signFill: '#212c42',
           radius: 20,
         },
@@ -73,7 +77,7 @@ const defaultTheme = {
           counterColor: '#fff',
         },
         hover: {
-          backgroundFill: '#fff',
+          backgroundFill: '#999',
           signFill: '#212c42',
           radius: 26,
           counterFill: '#2aa0f5',

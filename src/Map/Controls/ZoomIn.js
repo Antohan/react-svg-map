@@ -1,9 +1,9 @@
-import React, { PureComponent } from 'react';
+import React, { PureComponent, } from 'react';
 import PropTypes from 'prop-types';
-import { withTheme } from 'styled-components';
+import { withTheme, } from 'styled-components';
 import get from 'lodash/get';
-import { innerMerge, getThemeAsPlainObjectByKeys } from '../../utils';
-import { defaultTheme } from '../../theme/index';
+import {innerMerge, getThemeAsPlainObjectByKeys, getTheme,} from '../../utils';
+import { defaultTheme, } from '../../theme/index';
 
 
 class ZoomIn extends PureComponent {
@@ -30,29 +30,23 @@ class ZoomIn extends PureComponent {
   theme = {};
 
   currentTheme = () => {
-    const { hover } = this.state;
+    const { theme } = this.props;
+    const { hover, } = this.state;
     const current = hover ? 'hover' : 'normal';
 
-    if (!this.theme[current]) {
-      const { theme } = this.props;
-      const merged = innerMerge(
-        {},
-        get(defaultTheme, `Map.Controls.ZoomIn.${current}`, {}),
-        get(theme, `Map.Controls.ZoomIn.${current}`, {}),
-      );
-
-      this.theme[current] = getThemeAsPlainObjectByKeys(merged);
-    }
+    if (!this.theme[current]) this.theme[current] = getTheme(theme, `Map.Controls.ZoomIn.${current}`);
 
     return this.theme[current];
   };
 
-  onMouseEnter = () => this.setState({ hover: true });
+  onMouseEnter = () => this.setState({ hover: true, });
 
-  onMouseLeave = () => this.setState({ hover: false });
+  onMouseLeave = () => this.setState({ hover: false, });
+
+  onClick = () => this.props.onClick();
 
   render() {
-    const { positionCenter, onClick } = this.props;
+    const { positionCenter, onClick, } = this.props;
     const theme = this.currentTheme();
     const size = theme.radius * 2 + 10;
     const translationX = positionCenter.x - size / 2;
@@ -64,6 +58,7 @@ class ZoomIn extends PureComponent {
           <g
             onMouseEnter={this.onMouseEnter}
             onMouseLeave={this.onMouseLeave}
+            onClick={this.onClick}
             transform="translate(1 1)"
             filter="url(#filter_zoomin)"
           >
@@ -93,8 +88,10 @@ class ZoomIn extends PureComponent {
           <defs>
             <filter
               id="filter_zoomin"
-              x="0" y="0"
-              width="50" height="50"
+              x="0"
+              y="0"
+              width="50"
+              height="50"
               filterUnits="userSpaceOnUse"
               colorInterpolationFilters="sRGB"
             >
