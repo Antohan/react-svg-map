@@ -1,9 +1,8 @@
-import React, { PureComponent } from 'react';
+import React, { PureComponent, } from 'react';
 import PropTypes from 'prop-types';
-import { withTheme } from 'styled-components';
-import get from 'lodash/get';
-import { innerMerge, getThemeAsPlainObjectByKeys } from '../../utils';
-import { defaultTheme } from '../../theme/index';
+import { withTheme, } from 'styled-components';
+import { getTheme } from '../../utils';
+import { defaultTheme, } from '../../theme/index';
 
 
 class Region extends PureComponent {
@@ -12,18 +11,21 @@ class Region extends PureComponent {
   static propTypes = {
     theme: PropTypes.object,
     onClick: PropTypes.func,
-    title: PropTypes.string.isRequired,
-    id: PropTypes.string.isRequired,
-    path: PropTypes.string.isRequired,
-    isActive: PropTypes.bool,
-    onMount: PropTypes.func.isRequired,
-    onUnmount: PropTypes.func.isRequired,
+    data: PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      title: PropTypes.string.isRequired,
+      size: PropTypes.arrayOf(PropTypes.number),
+      center: PropTypes.arrayOf(PropTypes.number),
+    }),
+    active: PropTypes.bool,
+    inactive: PropTypes.bool,
   };
 
   static defaultProps = {
     theme: defaultTheme,
     onClick: undefined,
-    isActive: false,
+    active: false,
+    inactive: false,
   };
 
   state = {
@@ -34,60 +36,47 @@ class Region extends PureComponent {
 
   theme = {};
 
-  componentDidMount() {
-    const { id, onMount } = this.props;
-    onMount({ id, ref: this.wrapRef });
-  }
-
-  componentWillUnmount() {
-    const { id, onUnmount } = this.props;
-    onUnmount(id);
-  }
-
   currentTheme = () => {
-    const { theme, isActive } = this.props;
-    const { hover } = this.state;
+    const { active, theme, inactive } = this.props;
+    const { hover, } = this.state;
     let current = 'normal';
+    if (active) current = 'active';
     if (hover) current = 'hover';
-    if (isActive) current = 'active';
+    if (inactive) current = 'inactive';
 
-    if (!this.theme[current]) {
-      const merged = innerMerge(
-        {},
-        get(defaultTheme, `Map.Region.${current}`, {}),
-        get(theme, `Map.Region.${current}`, {}),
-      );
-
-      this.theme[current] = getThemeAsPlainObjectByKeys(merged);
-    }
+    if (!this.theme[current]) this.theme[current] = getTheme(theme, `Map.Region.${current}`);
 
     return this.theme[current];
   };
 
   onClick = () => {
-    const { onClick, id } = this.props;
+    const { onClick, data, } = this.props;
     const rect = this.wrapRef.current.getBoundingClientRect();
-
-    if (onClick) onClick({ id, rect });
+    if (onClick) onClick({ id: data.id, rect });
   };
 
-  onMouseEnter = () => this.setState({ hover: true });
+  onMouseEnter = () => this.setState({ hover: true, });
 
-  onMouseLeave = () => this.setState({ hover: false });
+  onMouseLeave = () => this.setState({ hover: false, });
 
   render() {
-    const { path: d, id } = this.props;
+    const { data, inactive } = this.props;
     const theme = this.currentTheme();
+    const props = inactive
+      ? {}
+      : {
+        onMouseEnter: this.onMouseEnter,
+        onMouseLeave: this.onMouseLeave,
+        onClick: this.onClick,
+      };
 
     return (
       <g
-        id={`region-${id}`}
+        id={`region-${data.id}`}
         ref={this.wrapRef}
-        onMouseEnter={this.onMouseEnter}
-        onMouseLeave={this.onMouseLeave}
-        onClick={this.onClick}
+        {...props}
       >
-        <path d={d} {...theme} />
+        <path d={data.path} {...theme} />
       </g>
     );
   }

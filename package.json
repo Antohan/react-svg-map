@@ -1,7 +1,7 @@
 {
-  "name": "@crpt/react-map",
-  "version": "0.0.3",
-  "description": "react-map react component",
+  "name": "@crpt/react-svg-map",
+  "version": "0.0.4",
+  "description": "react-svg-map react component",
   "main": "lib/index.js",
   "module": "es/index.js",
   "files": [
@@ -23,6 +23,7 @@
     "access": "public"
   },
   "dependencies": {
+    "d3": "^5.5.0",
     "prop-types": "^15.6.2",
     "styled-components": "1.4.6 - 3"
   },
@@ -72,9 +73,9 @@
   "contributors": [
     "Ivan Oshcheopkov"
   ],
-  "homepage": "https://github.com/crptteam/react-map",
+  "homepage": "https://github.com/crptteam/react-svg-map",
   "license": "MIT",
-  "repository": "https://github.com/crptteam/react-map",
+  "repository": "https://github.com/crptteam/react-svg-map",
   "keywords": [
     "react-component"
   ],

@@ -1,9 +1,8 @@
-import React, { PureComponent } from 'react';
+import React, { PureComponent, } from 'react';
 import PropTypes from 'prop-types';
-import styled, { withTheme } from 'styled-components';
-import get from 'lodash/get';
-import { defaultTheme } from '../theme';
-import { getThemeAsPlainObjectByKeys, innerMerge } from '../utils';
+import styled, { withTheme, } from 'styled-components';
+import { defaultTheme, } from '../theme';
+import {getGlobalTheme, getTheme,} from '../utils';
 
 
 const Wrap = styled.div`
@@ -46,27 +45,12 @@ class Background extends PureComponent {
     theme: defaultTheme,
   };
 
-  theme = null;
-
-  currentTheme = () => {
-    if (!this.theme) {
-      const { theme } = this.props;
-
-      const merged = innerMerge(
-        {},
-        get(defaultTheme, 'Map', {}),
-        get(theme, 'Map', {}),
-      );
-
-      this.theme = getThemeAsPlainObjectByKeys(merged);
-    }
-
-    return this.theme;
+  state = {
+    theme: getTheme(this.props.theme, 'Map')
   };
 
-
   renderHorizontalLines = () => {
-    const theme = this.currentTheme();
+    const { theme } = this.state;
     const deltaY = Math.floor(100 / (theme.horizontalLines + 1));
 
     return Array(theme.horizontalLines)
@@ -75,7 +59,7 @@ class Background extends PureComponent {
   };
 
   renderVerticalLines = () => {
-    const theme = this.currentTheme();
+    const { theme } = this.state;
     const deltaY = Math.floor(100 / (theme.verticalLines + 1));
 
     return Array(theme.verticalLines)

@@ -1,16 +1,16 @@
-import React, { PureComponent } from 'react';
+import React, { PureComponent, } from 'react';
 import PropTypes from 'prop-types';
-import { withTheme } from 'styled-components';
+import { withTheme, } from 'styled-components';
 import get from 'lodash/get';
-import { innerMerge, getThemeAsPlainObjectByKeys } from '../../utils';
-import { defaultTheme } from '../../theme/index';
+import {innerMerge, getThemeAsPlainObjectByKeys, getTheme,} from '../../utils';
+import { defaultTheme, } from '../../theme/index';
 
 
 class ZoomOut extends PureComponent {
   static displayName = 'ZoomOut';
 
   static propTypes = {
-    onClick: PropTypes.func,
+    onClick: PropTypes.func.isRequired,
     theme: PropTypes.object,
     positionCenter: PropTypes.shape({
       x: PropTypes.number.isRequired,
@@ -19,7 +19,6 @@ class ZoomOut extends PureComponent {
   };
 
   static defaultProps = {
-    onClick: undefined,
     theme: defaultTheme,
   };
 
@@ -30,34 +29,23 @@ class ZoomOut extends PureComponent {
   theme = {};
 
   currentTheme = () => {
-    const { hover } = this.state;
+    const { theme } = this.props;
+    const { hover, } = this.state;
     const current = hover ? 'hover' : 'normal';
 
-    if (!this.theme[current]) {
-      const { theme } = this.props;
-      const merged = innerMerge(
-        {},
-        get(defaultTheme, `Map.Controls.ZoomOut.${current}`, {}),
-        get(theme, `Map.Controls.ZoomOut.${current}`, {}),
-      );
-
-      this.theme[current] = getThemeAsPlainObjectByKeys(merged);
-    }
+    if (!this.theme[current]) this.theme[current] = getTheme(theme, `Map.Controls.ZoomOut.${current}`);
 
     return this.theme[current];
   };
 
-  onMouseEnter = () => this.setState({ hover: true });
+  onMouseEnter = () => this.setState({ hover: true, });
 
-  onMouseLeave = () => this.setState({ hover: false });
+  onMouseLeave = () => this.setState({ hover: false, });
 
-  onClick = (e) => {
-    const { onClick } = this.props;
-    if (onClick) onClick(e);
-  };
+  onClick = () => this.props.onClick();
 
   render() {
-    const { positionCenter } = this.props;
+    const { positionCenter, } = this.props;
     const theme = this.currentTheme();
     const size = theme.radius * 2 + 10;
     const translateX = positionCenter.x - size / 2;
@@ -92,8 +80,10 @@ class ZoomOut extends PureComponent {
           <defs>
             <filter
               id="filter_zoomout"
-              x="0" y="0"
-              width="50" height="50"
+              x="0"
+              y="0"
+              width="50"
+              height="50"
               filterUnits="userSpaceOnUse"
               colorInterpolationFilters="sRGB"
             >

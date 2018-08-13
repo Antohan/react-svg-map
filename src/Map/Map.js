@@ -1,16 +1,15 @@
-import React, { PureComponent } from 'react';
+import React, { PureComponent, } from 'react';
 import PropTypes from 'prop-types';
-import styled, { withTheme, ThemeProvider } from 'styled-components';
-import get from 'lodash/get';
-
-import { innerMerge, getThemeAsPlainObjectByKeys } from '../utils';
-import { defaultTheme } from '../theme';
+import {select} from 'd3';
+import styled, { withTheme, ThemeProvider, } from 'styled-components';
+import {getScale, getPosition, getTheme, getGlobalTheme, getFlatMap} from '../utils';
+import { defaultTheme, } from '../theme';
 
 import * as Maps from './Data';
-import { Controls } from './Controls';
-import { Regions } from './Regions';
-import Informations from './Info/Informations';
+import { Controls, } from './Controls';
 import Background from './Background';
+import District from './Regions/District';
+import Info from './Info';
 
 
 const Wrap = styled.div`
@@ -19,6 +18,14 @@ const Wrap = styled.div`
   position: relative;
   overflow: hidden;
   background: ${props => props.backgroundFill};
+`;
+
+const RegionsWrap = styled.svg`
+  position: absolute;
+  top: 0;
+  left: 0;
+  max-width: 100%;
+  max-height: 100%;
 `;
 
 
@@ -34,8 +41,6 @@ class Map extends PureComponent {
       region: PropTypes.string.isRequired,
     })),
     favorites: PropTypes.number,
-    scale: PropTypes.number,
-    scaleDelta: PropTypes.number,
     onZoomInClick: PropTypes.func,
     onZoomOutClick: PropTypes.func,
     onFlagClick: PropTypes.func,
@@ -46,11 +51,9 @@ class Map extends PureComponent {
   static defaultProps = {
     theme: defaultTheme,
     country: 'russia',
-    region: 'RF',
+    region: null,
     favorites: null,
     info: [],
-    scale: 1,
-    scaleDelta: 0.1,
     onZoomInClick: null,
     onZoomOutClick: null,
     onFlagClick: null,
@@ -59,233 +62,163 @@ class Map extends PureComponent {
   };
 
   state = {
-    scale: this.props.scale,
-    lastScale: 1,
-    region: this.props.region,
-    maximize: this.props.scale === 1,
+    map: Maps[this.props.country],
+    flatMap: getFlatMap(Maps[this.props.country]),
+    theme: getTheme(getGlobalTheme(this.props.theme), 'Map'),
   };
 
   wrapRef = React.createRef();
+  regionsNode = null;
+  regionsRef = React.createRef();
+  infoRefs = {};
 
-  regionsRef = null;
-
-  regionsInnerRef = null;
-
-  infoRefs = [];
-
-  regionRefs = [];
-
-  theme = null;
+  animationInterval = null;
+  lastScale = 1;
+  lastX = 0;
+  lastY = 0;
 
   componentDidMount() {
-    this.onRegionsUpdate();
-    window.addEventListener('resize', this.onRegionsUpdate);
+    const { region } = this.props;
+    if (region) this.zoomToSelectedId(region);
+    else this.animateInfoTranslation();
   }
 
-  componentWillUnmount() {
-    window.removeEventListener('resize', this.onRegionsUpdate);
-  }
-
-  componentDidUpdate() {
-    this.onRegionsUpdate();
-  }
-
-  static getDerivedStateFromProps(props, state) {
-    if (props.region !== state.region) {
-      return {
-        scale: props.scale,
-        lastScale: 1,
-        region: props.region,
-        maximize: props.scale === 1,
-      };
+  componentDidUpdate(prevProps) {
+    console.log(this.props);
+    const { region } = this.props;
+    if (region !== prevProps.region) {
+      this.zoomToSelectedId(region);
     }
-    return null;
   }
 
-  currentTheme = () => {
-    if (!this.theme) {
-      const { theme } = this.props;
-
-      const merged = innerMerge(
-        {},
-        get(defaultTheme, 'Map', {}),
-        get(theme, 'Map', {}),
-      );
-
-      this.theme = getThemeAsPlainObjectByKeys(merged);
-    }
-
-    return this.theme;
+  animateTranslation = (scale, x, y) => {
+    this.regionsNode
+      .transition()
+      .duration(750)
+      .attr('transform', `scale(${scale})translate(${x} ${y})`)
+      .on('end', this.animateInfoTranslation);
+    this.lastScale = scale;
+    this.lastX = x;
+    this.lastY = y;
   };
 
-  onZoomInClick = () => {
-    const { onZoomInClick, scaleDelta, } = this.props;
-    const { scale, } = this.state;
-
-    const newScale = Math.round((scale + scale * scaleDelta) * 100) / 100;
-
-    if (onZoomInClick) onZoomInClick(newScale);
-    this.setState({ scale: newScale, lastScale: scale, }, this.onRegionsUpdate);
-  };
-
-  onZoomOutClick = () => {
-    const { onZoomOutClick, scaleDelta, } = this.props;
-    const { scale, } = this.state;
-    if (scale - scaleDelta < scaleDelta) return;
-
-    const newScale = Math.round((scale - scale * scaleDelta) * 100) / 100;
-
-    if (onZoomOutClick) onZoomOutClick(newScale);
-    this.setState({ scale: newScale, lastScale: scale, }, this.onRegionsUpdate);
-  };
-
-  onFlagClick = () => {
-    const { onFlagClick, } = this.props;
-    if (onFlagClick) onFlagClick();
-    this.onRegionsUpdate();
-  };
-
-  onRegionClick = (region) => {
-    const { onRegionClick, } = this.props;
-    if (onRegionClick) onRegionClick(region);
-  };
-
-  onRegionsMount = (regionsRef, regionsInnerRef) => {
-    this.regionsRef = regionsRef;
-    this.regionsInnerRef = regionsInnerRef;
-  };
-
-  onRegionMount = ({ id, ref, }) => {
-    this.regionRefs[id] = ref;
-  };
-
-  onRegionUnmount = (id) => {
-    delete this.regionRefs[id];
-  };
-
-  onInfoMount = (info) => {
-    this.infoRefs.push(info);
-  };
-
-  onInfoUnmount = (id) => {
-    this.infoRefs = this.infoRefs.filter(i => i.id !== id);
-  };
-
-  /**
-   * Отцентровка карты в зависимости от видимого региона
-   */
-  onRegionsUpdate = () => {
-    const { scale, lastScale, maximize, } = this.state;
-
-    const regionsElement = this.regionsRef.current;
-    const regionsInnerElement = this.regionsInnerRef.current;
-
+  animateInfoTranslation = () => {
     const wrapRect = this.wrapRef.current.getBoundingClientRect();
-    const regionsInnerRect = regionsInnerElement.getBoundingClientRect();
-    const regionsInnerBBox = regionsInnerElement.getBBox();
-
-    const innerX = -regionsInnerBBox.x;
-    const innerY = -regionsInnerBBox.y;
-    regionsInnerElement.setAttribute('transform', `translate(${innerX} ${innerY})`);
-    regionsElement.setAttribute('height', wrapRect.height - 50);
-
-    const outerX = wrapRect.width / 2 - (regionsInnerRect.width / 2) / lastScale;
-    const outerY = (wrapRect.height - 50) / 2 - (regionsInnerRect.height / 2) / lastScale;
-
-    if (!maximize) {
-      regionsElement.setAttribute('transform', `scale(${scale})translate(${outerX} ${outerY})`);
-      this.setState({ lastScale: scale, }, this.updateRegionStroke);
-    } else {
-      const maxScaleX = Math.floor(wrapRect.width / regionsInnerRect.width);
-      const maxScaleY = Math.floor((wrapRect.height - 50) / regionsInnerRect.height);
-      const maxScale = Math.max(Math.min(maxScaleX, maxScaleY), lastScale);
-
-      regionsElement.setAttribute('transform', `scale(${maxScale})translate(${outerX} ${outerY})`);
-      this.setState(
-        { scale: maxScale, lastScale: maxScale, maximize: false, },
-        this.updateRegionStroke
-      );
-    }
-
-    this.updateInfoPosition();
-  };
-
-  updateRegionStroke = () => {
-    const { scale, } = this.state;
-    const regions = this.regionsRef.current;
-    regions.querySelectorAll('path').forEach((p) => {
-      p.setAttribute('stroke-width', 1 / scale);
+    Object.keys(this.infoRefs).forEach((key) => {
+      const { node, regionNode, center } = this.infoRefs[key];
+      const rect = regionNode.getBoundingClientRect();
+      const newX = (rect.x - wrapRect.x) + rect.width / 2 - center;
+      const newY = (rect.y - wrapRect.y) + rect.height / 2;
+      node.style.top = `${newY}px`;
+      node.style.left = `${newX}px`;
     });
   };
 
-  /**
-   * Обновление расположения плашек с информацией.
-   * Если указанный регион не видим - скрывает плашку.
-   */
-  updateInfoPosition = () => {
-    const wrapElement = this.wrapRef.current;
-    const wrapRect = wrapElement.getBoundingClientRect();
+  zoomToSelectedId = (id) => {
+    const { map, flatMap } = this.state;
+    let region = flatMap[id];
+    if (!region) region = map;
 
-    this.infoRefs.forEach(({ id, ref, }) => {
-      const infoNode = ref.current;
-      const regionRef = this.regionRefs[id];
-      if (!regionRef || !regionRef.current) {
-        infoNode.style.display = 'none';
-        return;
-      }
+    const scale = getScale(map.size, region.size);
 
-      infoNode.style.display = '';
+    this.animateTranslation(scale, ...getPosition(map.center, region.center));
+  };
 
-      const regionRect = regionRef.current.getBoundingClientRect();
-      const x = regionRect.x + regionRect.width / 2;
-      const y = regionRect.y + regionRect.height / 2;
+  onRegionClick = (region) => {
+    const { onRegionClick } = this.props;
+    if (onRegionClick) onRegionClick(region);
+    this.zoomToSelectedId(region.id);
+  };
 
-      const infoRect = infoNode.querySelector('svg').getBoundingClientRect();
-      const offsetX = wrapRect.x + infoRect.height / 2;
-      const offsetY = wrapRect.y + infoRect.height / 2;
+  onZoomInClick = () => {
+    const { onZoomInClick } = this.props;
+    const newScale = Math.round((this.lastScale + 0.5) * 100) / 100;
+    if (onZoomInClick) onZoomInClick(newScale);
+    this.animateTranslation(newScale, this.lastX, this.lastY);
+  };
 
-      infoNode.style.left = `${Math.round(x - offsetX)}px`;
-      infoNode.style.top = `${Math.round(y - offsetY)}px`;
+  onZoomOutClick = () => {
+    const { onZoomOutClick } = this.props;
+    let newScale = Math.round((this.lastScale - 0.5) * 100) / 100;
+    if (newScale < 0.5) newScale = 0.5;
+    if (onZoomOutClick) onZoomOutClick(newScale);
+    this.animateTranslation(newScale, this.lastX, this.lastY);
+  };
+
+  onInfoMount = (id, node) => {
+    const regionNode = this.regionsRef.querySelector(`#region-${id}`);
+    const rect = node.querySelector('svg').getBoundingClientRect();
+    this.infoRefs[id] = { node, regionNode, center: rect.width / 2 };
+  };
+
+  onInfoUnmount = (id) => {
+    delete this.infoRefs[id];
+  };
+
+  onRegionsMount = (f) => {
+    this.regionsRef = f;
+    this.regionsNode = select(f);
+  };
+
+  renderMap = () => {
+    const { region } = this.props;
+    const { map } = this.state;
+    if (!map) return (null);
+
+    return (
+      <RegionsWrap id="regions-layer" innerRef={this.onRegionsMount} viewBox="0 0 1000 580">
+        {map.children.map((child) => (
+          <District
+            key={child.id}
+            data={child}
+            selectedId={region}
+            mapId={map.id}
+            onClick={this.onRegionClick}
+          />
+        ))}
+      </RegionsWrap>
+    );
+  };
+
+  renderInfo = () => {
+    const { info, onInfoClick } = this.props;
+    const { flatMap } = this.state;
+    if (!info) return (null);
+
+    return info.map((i) => {
+      const region = flatMap[i.region];
+      if (!region) return (null);
+
+      return (
+        <Info
+          key={i.region}
+          region={region}
+          percents={i.percents}
+          onClick={onInfoClick}
+          onMount={this.onInfoMount}
+          onUnmount={this.onInfoUnmount}
+        />
+      );
     });
   };
 
   render() {
-    const {
-      favorites,
-      info,
-      country,
-      theme,
-      region,
-      onInfoClick,
-    } = this.props;
-    const map = Maps[country];
-    if (!map) return (null);
+    const { theme: globalTheme, favorites, onFlagClick } = this.props;
+    const { theme } = this.state;
 
     return (
-      <ThemeProvider theme={theme}>
-        <Wrap {...this.currentTheme()} innerRef={this.wrapRef}>
+      <ThemeProvider theme={getGlobalTheme(globalTheme)}>
+        <Wrap {...theme} innerRef={this.wrapRef}>
           <Background />
 
-          <Regions
-            data={map}
-            currentId={region}
-            onRegionClick={this.onRegionClick}
-            onMount={this.onRegionsMount}
-            onRegionMount={this.onRegionMount}
-            onRegionUnmount={this.onRegionUnmount}
-          />
+          {this.renderMap()}
 
-          <Informations
-            data={info}
-            regions={map}
-            onInfoMount={this.onInfoMount}
-            onInfoUnmount={this.onInfoUnmount}
-            onInfoClick={onInfoClick}
-          />
+          {this.renderInfo()}
+
           <Controls
             onZoomInClick={this.onZoomInClick}
             onZoomOutClick={this.onZoomOutClick}
-            onFlagClick={this.onFlagClick}
+            onFlagClick={onFlagClick}
             favorites={favorites}
           />
         </Wrap>
@@ -295,4 +228,4 @@ class Map extends PureComponent {
 }
 
 
-export default withTheme(Map);
+export default Map;

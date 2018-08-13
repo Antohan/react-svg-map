@@ -1,10 +1,11 @@
 import React, { PureComponent, } from 'react';
 import PropTypes from 'prop-types';
-import styled from 'styled-components';
+import styled, {withTheme} from 'styled-components';
 import { defaultTheme, } from '../../theme/index';
 import ZoomOut from './ZoomOut';
 import ZoomIn from './ZoomIn';
 import Flag from './Flag';
+import {getTheme} from "../../utils";
 
 
 const Wrap = styled.svg`
@@ -15,15 +16,15 @@ const Wrap = styled.svg`
 `;
 
 
-export default class Controls extends PureComponent {
+class Controls extends PureComponent {
   static displayName = 'Controls';
 
   static propTypes = {
     theme: PropTypes.object,
     favorites: PropTypes.number,
-    onZoomOutClick: PropTypes.func,
-    onZoomInClick: PropTypes.func,
-    onFlagClick: PropTypes.func,
+    onZoomOutClick: PropTypes.func.isRequired,
+    onZoomInClick: PropTypes.func.isRequired,
+    onFlagClick: PropTypes.func.isRequired,
   };
 
   static defaultProps = {
@@ -31,7 +32,7 @@ export default class Controls extends PureComponent {
   };
 
   getSize = () => {
-    const { theme, } = this.props;
+    const { theme } = this.props;
     const allCtrls = theme.Map.Controls;
 
     let height = 0;
@@ -57,7 +58,6 @@ export default class Controls extends PureComponent {
 
   render() {
     const {
-      theme,
       favorites,
       onZoomOutClick,
       onZoomInClick,
@@ -73,16 +73,17 @@ export default class Controls extends PureComponent {
     return (
       <Wrap {...size}>
         <g id="zoom-controls-layer">
-          <ZoomOut theme={theme} onClick={onZoomOutClick} positionCenter={zoomOutPosition} />
+          <ZoomOut onClick={onZoomOutClick} positionCenter={zoomOutPosition} />
           <Flag
-            theme={theme}
             onClick={onFlagClick}
             positionCenter={flagPosition}
             favorites={favorites}
           />
-          <ZoomIn theme={theme} onClick={onZoomInClick} positionCenter={zoomInPosition} />
+          <ZoomIn onClick={onZoomInClick} positionCenter={zoomInPosition} />
         </g>
       </Wrap>
     );
   }
 }
+
+export default withTheme(Controls);
