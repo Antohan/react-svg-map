@@ -1,7 +1,8 @@
 import React, { PureComponent, } from 'react';
 import PropTypes from 'prop-types';
+import {select} from 'd3';
 import styled, { withTheme, ThemeProvider, } from 'styled-components';
-import {getSequence, getScale, getPosition, getTheme, getGlobalTheme, getFlatMap} from '../utils';
+import {getScale, getPosition, getTheme, getGlobalTheme, getFlatMap} from '../utils';
 import { defaultTheme, } from '../theme';
 
 import * as Maps from './Data';
@@ -67,6 +68,7 @@ class Map extends PureComponent {
   };
 
   wrapRef = React.createRef();
+  regionsNode = null;
   regionsRef = React.createRef();
   infoRefs = {};
 
@@ -82,30 +84,22 @@ class Map extends PureComponent {
   }
 
   componentDidUpdate(prevProps) {
+    console.log(this.props);
     const { region } = this.props;
     if (region !== prevProps.region) {
       this.zoomToSelectedId(region);
     }
   }
 
-  animateTranslation = (scales, xPoints, yPoints) => {
-    clearInterval(this.animationInterval);
-
-    const animation = () => {
-      this.lastScale = scales.shift();
-      this.lastX = xPoints.shift();
-      this.lastY = yPoints.shift();
-      this.regionsRef.current.setAttribute(
-        'transform',
-        `scale(${this.lastScale})translate(${this.lastX} ${this.lastY})`
-      );
-      this.regionsRef.current.setAttribute('stroke-width', 1 / this.lastScale);
-
-      if (!scales.length) clearInterval(this.animationInterval);
-      this.animateInfoTranslation();
-    };
-
-    this.animationInterval = setInterval(animation, 1000 / 30);
+  animateTranslation = (scale, x, y) => {
+    this.regionsNode
+      .transition()
+      .duration(750)
+      .attr('transform', `scale(${scale})translate(${x} ${y})`)
+      .on('end', this.animateInfoTranslation);
+    this.lastScale = scale;
+    this.lastX = x;
+    this.lastY = y;
   };
 
   animateInfoTranslation = () => {
@@ -126,15 +120,8 @@ class Map extends PureComponent {
     if (!region) region = map;
 
     const scale = getScale(map.size, region.size);
-    // const center = region === map ? map.center : [map.center[0] / 2, map.center[1]];
-    // console.log(map.center);
-    const [positionX, positionY] = getPosition(map.center, region.center);
 
-    const scales = getSequence(this.lastScale, scale, 30, 100);
-    const xPoints = getSequence(this.lastX, positionX, 30, 100);
-    const yPoints = getSequence(this.lastY, positionY, 30, 100);
-
-    this.animateTranslation(scales, xPoints, yPoints);
+    this.animateTranslation(scale, ...getPosition(map.center, region.center));
   };
 
   onRegionClick = (region) => {
@@ -147,11 +134,7 @@ class Map extends PureComponent {
     const { onZoomInClick } = this.props;
     const newScale = Math.round((this.lastScale + 0.5) * 100) / 100;
     if (onZoomInClick) onZoomInClick(newScale);
-
-    const scales = getSequence(this.lastScale, newScale, 30, 100);
-    const xPoints = getSequence(this.lastX, this.lastX, 30, 100);
-    const yPoints = getSequence(this.lastY, this.lastY, 30, 100);
-    this.animateTranslation(scales, xPoints, yPoints);
+    this.animateTranslation(newScale, this.lastX, this.lastY);
   };
 
   onZoomOutClick = () => {
@@ -159,15 +142,11 @@ class Map extends PureComponent {
     let newScale = Math.round((this.lastScale - 0.5) * 100) / 100;
     if (newScale < 0.5) newScale = 0.5;
     if (onZoomOutClick) onZoomOutClick(newScale);
-
-    const scales = getSequence(this.lastScale, newScale, 30, 100);
-    const xPoints = getSequence(this.lastX, this.lastX, 30, 100);
-    const yPoints = getSequence(this.lastY, this.lastY, 30, 100);
-    this.animateTranslation(scales, xPoints, yPoints);
+    this.animateTranslation(newScale, this.lastX, this.lastY);
   };
 
   onInfoMount = (id, node) => {
-    const regionNode = this.regionsRef.current.querySelector(`#region-${id}`);
+    const regionNode = this.regionsRef.querySelector(`#region-${id}`);
     const rect = node.querySelector('svg').getBoundingClientRect();
     this.infoRefs[id] = { node, regionNode, center: rect.width / 2 };
   };
@@ -176,13 +155,18 @@ class Map extends PureComponent {
     delete this.infoRefs[id];
   };
 
+  onRegionsMount = (f) => {
+    this.regionsRef = f;
+    this.regionsNode = select(f);
+  };
+
   renderMap = () => {
     const { region } = this.props;
     const { map } = this.state;
     if (!map) return (null);
 
     return (
-      <RegionsWrap id="regions-layer" innerRef={this.regionsRef} viewBox="0 0 1000 580">
+      <RegionsWrap id="regions-layer" innerRef={this.onRegionsMount} viewBox="0 0 1000 580">
         {map.children.map((child) => (
           <District
             key={child.id}
