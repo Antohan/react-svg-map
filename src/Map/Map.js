@@ -12,20 +12,37 @@ import District from './Regions/District';
 import Info from './Info';
 
 
-const Wrap = styled.div`
+const OuterWrap = styled.div`
   width: 100%;
   height: 100%;
   position: relative;
+  background: ${props => props.backgroundFill};  
   overflow: hidden;
-  background: ${props => props.backgroundFill};
 `;
 
-const RegionsWrap = styled.svg`
+const Wrap = styled.div`
+  width: 90%;
+  height: calc(100% - 50px);
+  position: absolute;
+  top: 5%;
+  left: 50%;
+  transform: translateX(-50%);
+`;
+
+const RegionsLayer = styled.svg`
   position: absolute;
   top: 0;
   left: 0;
   max-width: 100%;
   max-height: 100%;
+`;
+
+const RegionsWrap = styled.div`
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
 `;
 
 
@@ -68,11 +85,10 @@ class Map extends PureComponent {
   };
 
   wrapRef = React.createRef();
-  regionsNode = null;
-  regionsRef = React.createRef();
+  regionsLayerRef = React.createRef();
+  regionsWrapRef = React.createRef();
   infoRefs = {};
 
-  animationInterval = null;
   lastScale = 1;
   lastX = 0;
   lastY = 0;
@@ -84,7 +100,6 @@ class Map extends PureComponent {
   }
 
   componentDidUpdate(prevProps) {
-    console.log(this.props);
     const { region } = this.props;
     if (region !== prevProps.region) {
       this.zoomToSelectedId(region);
@@ -92,7 +107,7 @@ class Map extends PureComponent {
   }
 
   animateTranslation = (scale, x, y) => {
-    this.regionsNode
+    select(this.regionsLayerRef.current)
       .transition()
       .duration(750)
       .attr('transform', `scale(${scale})translate(${x} ${y})`)
@@ -119,9 +134,23 @@ class Map extends PureComponent {
     let region = flatMap[id];
     if (!region) region = map;
 
+    const rect = this.regionsWrapRef.current.getBoundingClientRect();
     const scale = getScale(map.size, region.size);
 
-    this.animateTranslation(scale, ...getPosition(map.center, region.center));
+    this.animateTranslation(scale, ...getPosition(map.center, region.center, rect));
+
+    if (id !== map.id) {
+      select(this.regionsWrapRef.current)
+        .transition()
+        .duration(750)
+        .style('left', `${-rect.width / 4}px`);
+    } else {
+      select(this.regionsWrapRef.current)
+        .transition()
+        .duration(750)
+        .style('left', '0px');
+    }
+
   };
 
   onRegionClick = (region) => {
@@ -146,7 +175,7 @@ class Map extends PureComponent {
   };
 
   onInfoMount = (id, node) => {
-    const regionNode = this.regionsRef.querySelector(`#region-${id}`);
+    const regionNode = this.regionsLayerRef.current.querySelector(`#region-${id}`);
     const rect = node.querySelector('svg').getBoundingClientRect();
     this.infoRefs[id] = { node, regionNode, center: rect.width / 2 };
   };
@@ -155,27 +184,24 @@ class Map extends PureComponent {
     delete this.infoRefs[id];
   };
 
-  onRegionsMount = (f) => {
-    this.regionsRef = f;
-    this.regionsNode = select(f);
-  };
-
   renderMap = () => {
     const { region } = this.props;
     const { map } = this.state;
     if (!map) return (null);
 
     return (
-      <RegionsWrap id="regions-layer" innerRef={this.onRegionsMount} viewBox="0 0 1000 580">
-        {map.children.map((child) => (
-          <District
-            key={child.id}
-            data={child}
-            selectedId={region}
-            mapId={map.id}
-            onClick={this.onRegionClick}
-          />
-        ))}
+      <RegionsWrap innerRef={this.regionsWrapRef}>
+        <RegionsLayer id={`region-${map.id}`} innerRef={this.regionsLayerRef} viewBox="0 0 1000 580">
+          {map.children.map((child) => (
+            <District
+              key={child.id}
+              data={child}
+              selectedId={region}
+              mapId={map.id}
+              onClick={this.onRegionClick}
+            />
+          ))}
+        </RegionsLayer>
       </RegionsWrap>
     );
   };
@@ -208,12 +234,16 @@ class Map extends PureComponent {
 
     return (
       <ThemeProvider theme={getGlobalTheme(globalTheme)}>
-        <Wrap {...theme} innerRef={this.wrapRef}>
+        <OuterWrap {...theme}>
           <Background />
 
-          {this.renderMap()}
+          <Wrap innerRef={this.wrapRef}>
 
-          {this.renderInfo()}
+            {this.renderMap()}
+
+            {this.renderInfo()}
+
+          </Wrap>
 
           <Controls
             onZoomInClick={this.onZoomInClick}
@@ -221,7 +251,7 @@ class Map extends PureComponent {
             onFlagClick={onFlagClick}
             favorites={favorites}
           />
-        </Wrap>
+        </OuterWrap>
       </ThemeProvider>
     );
   }
