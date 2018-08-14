@@ -54,7 +54,6 @@ class Background extends PureComponent {
     const deltaY = Math.floor(100 / (theme.horizontalLines + 1));
 
     return Array(theme.horizontalLines)
-      .fill(null)
       .map((_, i) => (<HorizontalLine key={i} top={(i + 1) * deltaY} />));
   };
 
@@ -63,7 +62,6 @@ class Background extends PureComponent {
     const deltaY = Math.floor(100 / (theme.verticalLines + 1));
 
     return Array(theme.verticalLines)
-      .fill(null)
       .map((_, i) => (<VerticalLine key={i} left={(i + 1) * deltaY} />));
   };
 

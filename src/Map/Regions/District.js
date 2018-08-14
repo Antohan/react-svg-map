@@ -52,9 +52,16 @@ class District extends PureComponent {
     return this.theme[current];
   };
 
-  onMouseEnter = () => this.setState({ hover: true, });
+  onMouseEnter = () => {
+    this.setState({ hover: true, });
+    const parent = this.wrapRef.current.parentNode;
+    parent.removeChild(this.wrapRef.current);
+    parent.appendChild(this.wrapRef.current);
+  };
 
-  onMouseLeave = () => this.setState({ hover: false, });
+  onMouseLeave = () => {
+    this.setState({ hover: false, });
+  };
 
   onClick = (target) => {
     const { onClick, data } = this.props;
@@ -75,7 +82,6 @@ class District extends PureComponent {
         ref={this.wrapRef}
         onMouseEnter={this.onMouseEnter}
         onMouseLeave={this.onMouseLeave}
-        filter={`url(#district-outline-${data.id})`}
       >
         {data.children.map(child => (
           <Region
@@ -87,14 +93,7 @@ class District extends PureComponent {
             onClick={this.onClick}
           />
         ))}
-        <defs>
-          <filter id={`district-outline-${data.id}`}>
-            <feMorphology operator="dilate" in="SourceAlpha" radius="1" result="expanded" />
-            <feFlood floodColor={theme.border} />
-            <feComposite in2="expanded" operator="in" />
-            <feComposite in="SourceGraphic" />
-          </filter>
-        </defs>
+        <path d={data.path} {...theme} style={{ pointerEvents: 'none' }} />
       </g>
     );
   }

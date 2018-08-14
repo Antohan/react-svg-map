@@ -163,14 +163,14 @@ class Map extends PureComponent {
 
   onZoomInClick = () => {
     const { onZoomInClick } = this.props;
-    const newScale = Math.round((this.lastScale + 0.5) * 100) / 100;
+    const newScale = Math.round((this.lastScale + this.lastScale * 0.25) * 100) / 100;
     if (onZoomInClick) onZoomInClick(newScale);
     this.animateTranslation(newScale, this.lastX, this.lastY);
   };
 
   onZoomOutClick = () => {
     const { onZoomOutClick } = this.props;
-    let newScale = Math.round((this.lastScale - 0.5) * 100) / 100;
+    let newScale = Math.round((this.lastScale - this.lastScale * 0.33) * 100) / 100;
     if (newScale < 0.5) newScale = 0.5;
     if (onZoomOutClick) onZoomOutClick(newScale);
     this.animateTranslation(newScale, this.lastX, this.lastY);
@@ -189,10 +189,11 @@ class Map extends PureComponent {
     const { region } = this.props;
     const { map } = this.state;
     if (!map) return (null);
+    const { size: [width, height] } = map;
 
     return (
       <RegionsWrap innerRef={this.regionsWrapRef}>
-        <RegionsLayer id={`region-${map.id}`} innerRef={this.regionsLayerRef} viewBox="0 0 1000 580">
+        <RegionsLayer id={`region-${map.id}`} innerRef={this.regionsLayerRef} viewBox={`0 0 ${width} ${height}`}>
           {map.children.map((child) => (
             <District
               key={child.id}

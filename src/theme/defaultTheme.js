@@ -5,16 +5,20 @@ const defaultTheme = {
     horizontalLines: 2,
     District: {
       normal: {
-        border: '#ff0',
+        fill: 'transparent',
+        stroke: '#f00',
       },
       hover: {
-        border: '#0ff',
+        fill: 'transparent',
+        stroke: '#0f0',
       },
       active: {
-        border: '#0ff',
+        fill: 'transparent',
+        stroke: '#00f',
       },
       inactive: {
-        border: '#066',
+        fill: 'transparent',
+        stroke: '#666',
       },
     },
     Region: {
