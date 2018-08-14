@@ -3,6 +3,24 @@ const defaultTheme = {
     backgroundFill: '#212c42',
     verticalLines: 7,
     horizontalLines: 2,
+    District: {
+      normal: {
+        fill: 'transparent',
+        stroke: '#f00',
+      },
+      hover: {
+        fill: 'transparent',
+        stroke: '#0f0',
+      },
+      active: {
+        fill: 'transparent',
+        stroke: '#00f',
+      },
+      inactive: {
+        fill: 'transparent',
+        stroke: '#666',
+      },
+    },
     Region: {
       normal: {
         fill: '#435166',

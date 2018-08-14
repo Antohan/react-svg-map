@@ -41,8 +41,8 @@ class Region extends PureComponent {
     const { hover, } = this.state;
     let current = 'normal';
     if (active) current = 'active';
+    else if (inactive) current = 'inactive';
     if (hover) current = 'hover';
-    if (inactive) current = 'inactive';
 
     if (!this.theme[current]) this.theme[current] = getTheme(theme, `Map.Region.${current}`);
 
@@ -62,7 +62,7 @@ class Region extends PureComponent {
   render() {
     const { data, inactive } = this.props;
     const theme = this.currentTheme();
-    const props = inactive
+    const props = false
       ? {}
       : {
         onMouseEnter: this.onMouseEnter,
