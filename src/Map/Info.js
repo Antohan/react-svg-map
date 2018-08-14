@@ -113,9 +113,9 @@ class Info extends PureComponent {
   };
 
   onClick = () => {
-    const { onClick, region, } = this.props;
-    if (onClick) onClick({ id: region, });
-    else fireEvent(`region-${region}`, 'click');
+    const { onClick, region: { id } } = this.props;
+    if (onClick) onClick({ id });
+    else fireEvent(`region-${id}`, 'click');
   };
 
   backgroundFill = (percent) => {
@@ -182,6 +182,7 @@ class Info extends PureComponent {
 
     return (
       <Wrap
+        id={`info-${region.id}`}
         innerRef={this.wrapRef}
       >
         <SvgWrap

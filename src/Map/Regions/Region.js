@@ -62,7 +62,7 @@ class Region extends PureComponent {
   render() {
     const { data, inactive } = this.props;
     const theme = this.currentTheme();
-    const props = inactive
+    const props = false
       ? {}
       : {
         onMouseEnter: this.onMouseEnter,

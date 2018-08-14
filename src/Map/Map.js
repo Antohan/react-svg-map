@@ -82,6 +82,7 @@ class Map extends PureComponent {
     map: Maps[this.props.country],
     flatMap: getFlatMap(Maps[this.props.country]),
     theme: getTheme(getGlobalTheme(this.props.theme), 'Map'),
+    hideInfo: false,
   };
 
   wrapRef = React.createRef();
@@ -111,6 +112,7 @@ class Map extends PureComponent {
       .transition()
       .duration(750)
       .attr('transform', `scale(${scale})translate(${x} ${y})`)
+      .on('start', this.setState({ hideInfo: true }))
       .on('end', this.animateInfoTranslation);
     this.lastScale = scale;
     this.lastX = x;
@@ -119,14 +121,20 @@ class Map extends PureComponent {
 
   animateInfoTranslation = () => {
     const wrapRect = this.wrapRef.current.getBoundingClientRect();
-    Object.keys(this.infoRefs).forEach((key) => {
-      const { node, regionNode, center } = this.infoRefs[key];
-      const rect = regionNode.getBoundingClientRect();
-      const newX = (rect.x - wrapRect.x) + rect.width / 2 - center;
-      const newY = (rect.y - wrapRect.y) + rect.height / 2;
-      node.style.top = `${newY}px`;
-      node.style.left = `${newX}px`;
-    });
+    this.setState(
+      { hideInfo: false },
+      () => {
+        Object.keys(this.infoRefs).forEach((key) => {
+          const { node, center } = this.infoRefs[key];
+          const region = this.regionsLayerRef.current.querySelector(`#region-${key}`);
+          const rect = region.getBoundingClientRect();
+          const newX = (rect.x - wrapRect.x) + rect.width / 2 - center;
+          const newY = (rect.y - wrapRect.y) + rect.height / 2;
+          node.style.top = `${newY}px`;
+          node.style.left = `${newX}px`;
+        });
+      }
+    );
   };
 
   zoomToSelectedId = (id) => {
@@ -138,19 +146,6 @@ class Map extends PureComponent {
     const scale = getScale(map.size, region.size);
 
     this.animateTranslation(scale, ...getPosition(map.center, region.center, rect));
-
-    if (id !== map.id) {
-      select(this.regionsWrapRef.current)
-        .transition()
-        .duration(750)
-        .style('left', `${-rect.width / 4}px`);
-    } else {
-      select(this.regionsWrapRef.current)
-        .transition()
-        .duration(750)
-        .style('left', '0px');
-    }
-
   };
 
   onRegionClick = (region) => {
@@ -175,9 +170,8 @@ class Map extends PureComponent {
   };
 
   onInfoMount = (id, node) => {
-    const regionNode = this.regionsLayerRef.current.querySelector(`#region-${id}`);
     const rect = node.querySelector('svg').getBoundingClientRect();
-    this.infoRefs[id] = { node, regionNode, center: rect.width / 2 };
+    this.infoRefs[id] = { node, center: rect.width / 2 };
   };
 
   onInfoUnmount = (id) => {
@@ -208,8 +202,8 @@ class Map extends PureComponent {
 
   renderInfo = () => {
     const { info, onInfoClick } = this.props;
-    const { flatMap } = this.state;
-    if (!info) return (null);
+    const { flatMap, hideInfo } = this.state;
+    if (!info || hideInfo) return (null);
 
     return info.map((i) => {
       const region = flatMap[i.region];
