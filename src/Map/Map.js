@@ -110,9 +110,10 @@ class Map extends PureComponent {
   animateTranslation = (scale, x, y) => {
     select(this.regionsLayerRef.current)
       .transition()
-      .duration(750)
+      .duration(1000)
       .attr('transform', `scale(${scale})translate(${x} ${y})`)
-      .on('start', this.setState({ hideInfo: true }))
+      .attr('stroke-width', 1 / scale)
+      .on('start', () => this.setState({ hideInfo: true }))
       .on('end', this.animateInfoTranslation);
     this.lastScale = scale;
     this.lastX = x;
@@ -144,6 +145,12 @@ class Map extends PureComponent {
 
     const rect = this.regionsWrapRef.current.getBoundingClientRect();
     const scale = getScale(map.size, region.size);
+
+    const regionNode = this.regionsWrapRef.current.querySelector(`#region-${region.id}`);
+    if (!regionNode) return;
+    const parent = regionNode.parentNode;
+    parent.removeChild(regionNode);
+    parent.appendChild(regionNode);
 
     this.animateTranslation(scale, ...getPosition(map.center, region.center, rect));
   };

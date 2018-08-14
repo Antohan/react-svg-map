@@ -41,8 +41,8 @@ class Region extends PureComponent {
     const { hover, } = this.state;
     let current = 'normal';
     if (active) current = 'active';
+    else if (inactive) current = 'inactive';
     if (hover) current = 'hover';
-    if (inactive) current = 'inactive';
 
     if (!this.theme[current]) this.theme[current] = getTheme(theme, `Map.Region.${current}`);
 
