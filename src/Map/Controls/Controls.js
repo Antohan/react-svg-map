@@ -1,11 +1,12 @@
 import React, { PureComponent, } from 'react';
 import PropTypes from 'prop-types';
-import styled, {withTheme} from 'styled-components';
+import styled, { withTheme } from 'styled-components';
+import get from 'lodash/get';
 import { defaultTheme, } from '../../theme/index';
 import ZoomOut from './ZoomOut';
 import ZoomIn from './ZoomIn';
 import Flag from './Flag';
-import {getTheme} from "../../utils";
+import { innerMerge } from '../../utils';
 
 
 const Wrap = styled.svg`
@@ -31,16 +32,20 @@ class Controls extends PureComponent {
     theme: defaultTheme,
   };
 
+  state = {
+    theme: innerMerge(get(defaultTheme, 'Map.Controls'), get(this.props.theme, 'Map.Controls')),
+  };
+
   getSize = () => {
-    const { theme } = this.props;
-    const allCtrls = theme.Map.Controls;
+    const { theme } = this.state;
 
     let height = 0;
     let width = 0;
 
-    Object.keys(allCtrls).forEach((k) => {
+    Object.keys(theme).forEach((k) => {
       let controlWidth = 0;
-      const control = allCtrls[k];
+      const control = theme[k];
+      if (!control.show) return;
 
       Object.keys(control).forEach((status) => {
         const controlSize = parseInt(control[status].radius, 10) * 2 + 10;
@@ -63,6 +68,7 @@ class Controls extends PureComponent {
       onZoomInClick,
       onFlagClick,
     } = this.props;
+    const { theme } = this.state;
 
     const size = this.getSize();
     const heightCenter = size.height / 2;
@@ -73,13 +79,19 @@ class Controls extends PureComponent {
     return (
       <Wrap {...size}>
         <g id="zoom-controls-layer">
-          <ZoomOut onClick={onZoomOutClick} positionCenter={zoomOutPosition} />
-          <Flag
-            onClick={onFlagClick}
-            positionCenter={flagPosition}
-            favorites={favorites}
-          />
-          <ZoomIn onClick={onZoomInClick} positionCenter={zoomInPosition} />
+          {theme.ZoomOut.show && (
+            <ZoomOut onClick={onZoomOutClick} positionCenter={zoomOutPosition} />
+          )}
+          {theme.Flag.show && (
+            <Flag
+              onClick={onFlagClick}
+              positionCenter={flagPosition}
+              favorites={favorites}
+            />
+          )}
+          {theme.ZoomIn.show && (
+            <ZoomIn onClick={onZoomInClick} positionCenter={zoomInPosition} />
+          )}
         </g>
       </Wrap>
     );

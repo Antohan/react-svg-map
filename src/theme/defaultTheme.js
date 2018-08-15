@@ -63,6 +63,7 @@ const defaultTheme = {
     },
     Controls: {
       ZoomOut: {
+        show: true,
         normal: {
           backgroundFill: '#fff',
           signFill: '#212c42',
@@ -75,6 +76,7 @@ const defaultTheme = {
         },
       },
       ZoomIn: {
+        show: true,
         normal: {
           backgroundFill: '#fff',
           signFill: '#212c42',
@@ -87,6 +89,7 @@ const defaultTheme = {
         },
       },
       Flag: {
+        show: true,
         normal: {
           backgroundFill: '#fff',
           signFill: '#212c42',
