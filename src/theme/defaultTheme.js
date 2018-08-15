@@ -41,6 +41,11 @@ const defaultTheme = {
     },
     Info: {
       normal: {
+        usePercentColor: true,
+        backgroundFill0: '#145a9b',
+        backgroundFill1: '#387fc1',
+        backgroundFill2: '#55b5e7',
+        backgroundFill3: '#afe4ff',
         backgroundFillLow: '#7ac84f',
         backgroundFillMedium: '#65d7d2',
         backgroundFillHigh: '#fc7752',
@@ -51,6 +56,11 @@ const defaultTheme = {
         percentSize: '13px',
       },
       hover: {
+        usePercentColor: true,
+        backgroundFill0: '#145a9b',
+        backgroundFill1: '#387fc1',
+        backgroundFill2: '#55b5e7',
+        backgroundFill3: '#afe4ff',
         backgroundFillLow: '#7ac84f',
         backgroundFillMedium: '#65d7d2',
         backgroundFillHigh: '#fc7752',

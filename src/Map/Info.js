@@ -1,6 +1,7 @@
 import React, { PureComponent, } from 'react';
 import PropTypes from 'prop-types';
 import styled, { withTheme, } from 'styled-components';
+import isEqual from 'lodash/isEqual';
 import { fireEvent, getTheme } from '../utils';
 import { defaultTheme, } from '../theme/index';
 
@@ -69,8 +70,11 @@ class Info extends PureComponent {
     onUnmount(region.id);
   }
 
-  componentDidUpdate() {
-    this.updatePercents();
+  componentDidUpdate(oldProps) {
+    const { region, percents } = this.props;
+    if (!isEqual(region.id, oldProps.region.id) || !isEqual(percents, oldProps.percents)) {
+      this.updatePercents();
+    }
   }
 
   currentTheme = () => {
@@ -104,11 +108,13 @@ class Info extends PureComponent {
 
   onMouseEnter = () => {
     const { region } = this.props;
+    this.setState({ hover: true });
     fireEvent(`region-${region.id}`, 'mouseover');
   };
 
   onMouseLeave = () => {
     const { region } = this.props;
+    this.setState({ hover: false });
     fireEvent(`region-${region.id}`, 'mouseout');
   };
 
@@ -118,12 +124,16 @@ class Info extends PureComponent {
     else fireEvent(`region-${id}`, 'click');
   };
 
-  backgroundFill = (percent) => {
+  backgroundFill = (percent, index) => {
     const theme = this.currentTheme();
 
-    if (percent <= 33) return theme.backgroundFillLow;
-    if (percent <= 66) return theme.backgroundFillMedium;
-    return theme.backgroundFillHigh;
+    if (theme.usePercentColor) {
+      if (percent <= 33) return theme.backgroundFillLow;
+      if (percent <= 66) return theme.backgroundFillMedium;
+      return theme.backgroundFillHigh;
+    }
+
+    return theme[`backgroundFill${index}`];
   };
 
   renderPercents = () => {
@@ -165,7 +175,7 @@ class Info extends PureComponent {
             r={radius}
             strokeWidth="3"
             fill="transparent"
-            stroke={this.backgroundFill(percent)}
+            stroke={this.backgroundFill(percent, i)}
             strokeDasharray={circumference}
             strokeDashoffset={circumference}
             style={{ transition: 'stroke-dashoffset 0.4s linear', }}

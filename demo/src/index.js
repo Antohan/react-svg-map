@@ -28,9 +28,7 @@ const theme = {
   Map: {
     Info: {
       normal: {
-        backgroundFillLow: '#0f0',
-        backgroundFillMedium: '#00f',
-        backgroundFillHigh: '#f00',
+        usePercentColor: false,
       },
     },
     Region: {
