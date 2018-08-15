@@ -25,11 +25,12 @@ class Controls extends PureComponent {
     favorites: PropTypes.number,
     onZoomOutClick: PropTypes.func.isRequired,
     onZoomInClick: PropTypes.func.isRequired,
-    onFlagClick: PropTypes.func.isRequired,
+    onFlagClick: PropTypes.func,
   };
 
   static defaultProps = {
     theme: defaultTheme,
+    onFlagClick: null,
   };
 
   state = {
