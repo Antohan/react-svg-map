@@ -59,7 +59,9 @@ class Demo extends Component {
   };
 
   onFlagClick = () => {
-    this.setState({ region: 'RF', info: info['RF'], showInfoLegend: false });
+    this.setState({ region: 'RF', info: null, showInfoLegend: false}, () => {
+      this.setState({ region: 'RF', info: info['RF'] });
+    });
   };
 
   onZoomClick = () => this.setState({ showInfoLegend: false });

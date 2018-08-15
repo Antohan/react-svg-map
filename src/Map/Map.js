@@ -101,8 +101,8 @@ class Map extends PureComponent {
   }
 
   componentDidUpdate(prevProps) {
-    const { region } = this.props;
-    if (region !== prevProps.region) {
+    const { region, info } = this.props;
+    if (region !== prevProps.region || info !== prevProps.info) {
       this.zoomToSelectedId(region);
     }
   }
@@ -146,7 +146,7 @@ class Map extends PureComponent {
     const rect = this.regionsWrapRef.current.getBoundingClientRect();
     const scale = getScale(map.size, region.size);
 
-    const regionNode = this.regionsWrapRef.current.querySelector(`#region-${region.id}`);
+    const regionNode = this.wrapRef.current.querySelector(`#region-${region.id}`);
     if (!regionNode) return;
     const parent = regionNode.parentNode;
     parent.removeChild(regionNode);
