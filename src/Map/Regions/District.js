@@ -60,7 +60,14 @@ class District extends PureComponent {
   };
 
   onMouseLeave = () => {
+    const { data, selectedId } = this.props;
+    const active = data.id === selectedId;
     this.setState({ hover: false, });
+    if (!active) {
+      const parent = this.wrapRef.current.parentNode;
+      parent.removeChild(this.wrapRef.current);
+      parent.insertBefore(this.wrapRef.current, parent.firstChild);
+    }
   };
 
   onClick = (target) => {
