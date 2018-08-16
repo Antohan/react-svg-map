@@ -209,7 +209,7 @@ class Map extends PureComponent {
   onDrag = () => {
     const { subject, } = d3event;
     const { transform, width, height, } = getComputedStyle(subject);
-    const match = transform.match(/matrix\((-?[\d.]+), -?\d+, -?\d+, (-?[\d.]+), (-?\d+), (-?\d+)\)/);
+    const match = transform.match(/matrix\((-?[\d.]+), -?\d+, -?\d+, (-?[\d.]+), (-?[\d.]+), (-?[\d.]+)\)/);
     if (match) {
       const left = parseInt(match[3], 10) + d3event.dx;
       const top = parseInt(match[4], 10) + d3event.dy;
@@ -225,13 +225,15 @@ class Map extends PureComponent {
     const { wheelDeltaY } = d3event.sourceEvent;
 
     const { transform, } = getComputedStyle(this.wrapRef.current);
-    const match = transform.match(/matrix\((-?[\d.]+), -?\d+, -?\d+, (-?[\d.]+), (-?\d+), (-?\d+)\)/);
+    const match = transform.match(/matrix\((-?[\d.]+), -?\d+, -?\d+, (-?[\d.]+), (-?[\d.]+), (-?[\d.]+)\)/);
     if (match) {
       const scale = parseFloat(match[1]);
       const newScale = Math.round(
         (wheelDeltaY > 0 ? scale - scale * 0.033 : scale + scale * 0.025) * 100
       ) / 100;
-      this.wrapRef.current.style.transform = `translate(${match[3]}px, ${match[4]}px)scale(${newScale})`;
+      const left = parseInt(match[3], 10);
+      const top = parseInt(match[4], 10);
+      this.wrapRef.current.style.transform = `translate(${left}px, ${top}px)scale(${newScale})`;
     }
   };
 
