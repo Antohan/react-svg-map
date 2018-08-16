@@ -1,8 +1,9 @@
 import React, { PureComponent, } from 'react';
 import PropTypes from 'prop-types';
 import styled, { withTheme, } from 'styled-components';
+import times from 'lodash/times';
 import { defaultTheme, } from '../theme';
-import {getGlobalTheme, getTheme,} from '../utils';
+import { getGlobalTheme, getTheme, } from '../utils';
 
 
 const Wrap = styled.div`
@@ -13,24 +14,14 @@ const Wrap = styled.div`
   height: 100%;
 `;
 
-const VerticalLine = styled.div`
+const Line = styled.div`
   position: absolute;
-  width: 1px;
-  height: 100%;
-  top: 0;
-  left: ${props => props.left}%;
+  width: ${props => props.left ? '1px' : '100%'};
+  height: ${props => props.top ? '1px' : '100%'};
+  top: ${props => props.top || 0}%;
+  left: ${props => props.left || 0}%;
   opacity: 0.4;
-  background-image: linear-gradient(to bottom, #212c42, #ffffff 49%, #212c42);
-`;
-
-const HorizontalLine = styled.div`
-  position: absolute;
-  width: 100%;
-  height: 1px;
-  left: 0;
-  top: ${props => props.top}%;
-  opacity: 0.4;
-  background-image: linear-gradient(to right, #212c42, #ffffff 49%, #212c42);
+  background-color: ${props => props.bgColor};
 `;
 
 
@@ -46,23 +37,25 @@ class Background extends PureComponent {
   };
 
   state = {
-    theme: getTheme(this.props.theme, 'Map')
+    theme: getTheme(this.props.theme, 'Map'),
   };
 
   renderHorizontalLines = () => {
-    const { theme } = this.state;
+    const { theme, } = this.state;
     const deltaY = Math.floor(100 / (theme.horizontalLines + 1));
 
-    return Array(theme.horizontalLines)
-      .map((_, i) => (<HorizontalLine key={i} top={(i + 1) * deltaY} />));
+    return times(theme.horizontalLines, i => (
+      <Line key={i} top={(i + 1) * deltaY} bgColor={theme.backgroundLineColor} />
+    ));
   };
 
   renderVerticalLines = () => {
-    const { theme } = this.state;
+    const { theme, } = this.state;
     const deltaY = Math.floor(100 / (theme.verticalLines + 1));
 
-    return Array(theme.verticalLines)
-      .map((_, i) => (<VerticalLine key={i} left={(i + 1) * deltaY} />));
+    return times(theme.verticalLines, i => (
+      <Line key={i} left={(i + 1) * deltaY} bgColor={theme.backgroundLineColor} />
+    ));
   };
 
   render() {
