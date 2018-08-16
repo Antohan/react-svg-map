@@ -1,6 +1,6 @@
 import React, { PureComponent, } from 'react';
 import PropTypes from 'prop-types';
-import { select, } from 'd3';
+import { select, drag, event as d3event } from 'd3';
 import styled, { withTheme, ThemeProvider, } from 'styled-components';
 import isEqual from 'lodash/isEqual';
 import { getScale, getPosition, getTheme, getGlobalTheme, getFlatMap, } from '../utils';
@@ -25,9 +25,9 @@ const Wrap = styled.div`
   width: 90%;
   height: calc(100% - 50px);
   position: absolute;
-  top: 5%;
+  top: 50%;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translate(-50%, -50%);
 `;
 
 const RegionsLayer = styled.svg`
@@ -104,6 +104,9 @@ class Map extends PureComponent {
     const { region, } = this.props;
     if (region) this.zoomToSelectedId(region);
     else this.animateInfoTranslation();
+    const wrapDragger = drag().subject(this.wrapRef.current)
+      .on('drag', this.onDrag);
+    select(this.wrapRef.current).call(wrapDragger);
   }
 
   componentDidUpdate(prevProps) {
@@ -114,6 +117,9 @@ class Map extends PureComponent {
   }
 
   animateTranslation = (scale, x, y) => {
+    const { width, height } = getComputedStyle(this.wrapRef.current);
+    const left = -parseInt(width, 10) / 2;
+    const top = -parseInt(height, 10) / 2;
     select(this.regionsLayerRef.current)
       .transition()
       .duration(1000)
@@ -121,6 +127,10 @@ class Map extends PureComponent {
       .attr('stroke-width', 1 / scale)
       .on('start', () => this.setState({ hideInfo: true, }))
       .on('end', this.animateInfoTranslation);
+    select(this.wrapRef.current)
+      .transition()
+      .duration(1000)
+      .style('transform', `translate(${left}px, ${top}px)`);
     this.lastScale = scale;
     this.lastX = x;
     this.lastY = y;
@@ -189,6 +199,21 @@ class Map extends PureComponent {
 
   onInfoUnmount = (id) => {
     delete this.infoRefs[id];
+  };
+
+  onDrag = () => {
+    const { subject, } = d3event;
+    const { transform, width, height, } = getComputedStyle(subject);
+    const match = transform.match(/matrix\(-?\d+, -?\d+, -?\d+, -?\d+, (-?\d+), (-?\d+)\)/);
+    if (match) {
+      const left = parseInt(match[1], 10) + d3event.dx;
+      const top = parseInt(match[2], 10) + d3event.dy;
+      subject.style.transform = `translate(${left}px, ${top}px)`;
+    } else {
+      const left = -parseInt(width, 10) / 2;
+      const top = -parseInt(height, 10) / 2;
+      subject.style.transform = `translate(${left}px, ${top}px)`;
+    }
   };
 
   renderMap = () => {
