@@ -1,8 +1,9 @@
 import React, { PureComponent, } from 'react';
 import PropTypes from 'prop-types';
-import { select, drag, event as d3event } from 'd3';
+import { select, drag, zoom, event as d3event } from 'd3';
 import styled, { withTheme, ThemeProvider, } from 'styled-components';
 import isEqual from 'lodash/isEqual';
+import throttle from 'lodash/throttle';
 import { getScale, getPosition, getTheme, getGlobalTheme, getFlatMap, } from '../utils';
 import { defaultTheme, } from '../theme';
 
@@ -104,9 +105,10 @@ class Map extends PureComponent {
     const { region, } = this.props;
     if (region) this.zoomToSelectedId(region);
     else this.animateInfoTranslation();
+    const mapZoomer = zoom().on('zoom', this.onZoom);
     const wrapDragger = drag().subject(this.wrapRef.current)
       .on('drag', this.onDrag);
-    select(this.wrapRef.current).call(wrapDragger);
+    select(this.wrapRef.current).call(wrapDragger).call(mapZoomer);
   }
 
   componentDidUpdate(prevProps) {
@@ -116,21 +118,22 @@ class Map extends PureComponent {
     }
   }
 
-  animateTranslation = (scale, x, y) => {
+  animateTranslation = (scale, x, y, duration = 1000) => {
     const { width, height } = getComputedStyle(this.wrapRef.current);
     const left = -parseInt(width, 10) / 2;
     const top = -parseInt(height, 10) / 2;
+
+    select(this.wrapRef.current)
+      .transition()
+      .duration(duration)
+      .style('transform', `translate(${left}px, ${top}px)scale(1)`);
     select(this.regionsLayerRef.current)
       .transition()
-      .duration(1000)
+      .duration(duration)
       .attr('transform', `scale(${scale})translate(${x} ${y})`)
       .attr('stroke-width', 1 / scale)
       .on('start', () => this.setState({ hideInfo: true, }))
       .on('end', this.animateInfoTranslation);
-    select(this.wrapRef.current)
-      .transition()
-      .duration(1000)
-      .style('transform', `translate(${left}px, ${top}px)`);
     this.lastScale = scale;
     this.lastX = x;
     this.lastY = y;
@@ -159,7 +162,9 @@ class Map extends PureComponent {
     let region = flatMap[id];
     if (!region) region = map;
 
-    const rect = this.regionsWrapRef.current.getBoundingClientRect();
+    const wrapStyle = getComputedStyle(this.wrapRef.current);
+    const width = parseInt(wrapStyle.width, 10);
+    const height = parseInt(wrapStyle.height, 10);
     const scale = getScale(map.size, region.size);
 
     const regionNode = this.wrapRef.current.querySelector(`#region-${region.id}`);
@@ -168,7 +173,7 @@ class Map extends PureComponent {
     parent.removeChild(regionNode);
     parent.appendChild(regionNode);
 
-    this.animateTranslation(scale, ...getPosition(map.center, region.center, rect));
+    this.animateTranslation(scale, ...getPosition(map.center, region.center, { width, height }));
   };
 
   onRegionClick = (region) => {
@@ -204,15 +209,29 @@ class Map extends PureComponent {
   onDrag = () => {
     const { subject, } = d3event;
     const { transform, width, height, } = getComputedStyle(subject);
-    const match = transform.match(/matrix\(-?\d+, -?\d+, -?\d+, -?\d+, (-?\d+), (-?\d+)\)/);
+    const match = transform.match(/matrix\((-?[\d.]+), -?\d+, -?\d+, (-?[\d.]+), (-?\d+), (-?\d+)\)/);
     if (match) {
-      const left = parseInt(match[1], 10) + d3event.dx;
-      const top = parseInt(match[2], 10) + d3event.dy;
-      subject.style.transform = `translate(${left}px, ${top}px)`;
+      const left = parseInt(match[3], 10) + d3event.dx;
+      const top = parseInt(match[4], 10) + d3event.dy;
+      subject.style.transform = `translate(${left}px, ${top}px)scale(${match[1]})`;
     } else {
       const left = -parseInt(width, 10) / 2;
       const top = -parseInt(height, 10) / 2;
       subject.style.transform = `translate(${left}px, ${top}px)`;
+    }
+  };
+
+  onZoom = () => {
+    const { wheelDeltaY } = d3event.sourceEvent;
+
+    const { transform, } = getComputedStyle(this.wrapRef.current);
+    const match = transform.match(/matrix\((-?[\d.]+), -?\d+, -?\d+, (-?[\d.]+), (-?\d+), (-?\d+)\)/);
+    if (match) {
+      const scale = parseFloat(match[1]);
+      const newScale = Math.round(
+        (wheelDeltaY > 0 ? scale - scale * 0.033 : scale + scale * 0.025) * 100
+      ) / 100;
+      this.wrapRef.current.style.transform = `translate(${match[3]}px, ${match[4]}px)scale(${newScale})`;
     }
   };
 
