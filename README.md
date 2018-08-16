@@ -37,7 +37,7 @@ import Map, { THEMES } from "@crpt/react-svg-map";
 
 __Note1__. info - array of objects
 ```javascript
-const info = [{percent: 10, region: 'SZFO'}];
+const info = [{percent: 10, region: 'SZFO', owner: 'RF' }];
 ```
 
 __Note2__. onRegionClick receives object

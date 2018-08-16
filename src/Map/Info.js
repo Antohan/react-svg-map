@@ -2,7 +2,7 @@ import React, { PureComponent, } from 'react';
 import PropTypes from 'prop-types';
 import styled, { withTheme, } from 'styled-components';
 import isEqual from 'lodash/isEqual';
-import { fireEvent, getTheme } from '../utils';
+import { fireEvent, getTheme, } from '../utils';
 import { defaultTheme, } from '../theme/index';
 
 
@@ -24,6 +24,7 @@ const TextWrap = styled.div`
   transform: translateY(-55%);
   color: ${props => props.color};
   fontSize: ${props => props.fontSize};
+  pointer-events: none;
 `;
 
 const SvgWrap = styled.svg`
@@ -32,6 +33,7 @@ const SvgWrap = styled.svg`
   top: 50%;
   transform: translateY(-50%);
   filter: drop-shadow( 2px 2px 1px rgba(0,0,0,.7) );
+  pointer-events: none;
 `;
 
 
@@ -45,41 +47,52 @@ class Info extends PureComponent {
     onMount: PropTypes.func.isRequired,
     onUnmount: PropTypes.func.isRequired,
     onClick: PropTypes.func,
+    hidden: PropTypes.bool,
   };
 
   static defaultProps = {
     theme: defaultTheme,
+    hidden: false,
     onClick: null,
   };
 
   state = {
     hover: false,
+    hidden: false,
   };
 
   wrapRef = React.createRef();
 
   theme = {};
 
+  static getDerivedStateFromProps(nextProps, oldState) {
+    if (nextProps.hidden !== oldState.hidden) {
+      if (oldState.hover) return { hidden: false, };
+      return { hidden: nextProps.hidden, };
+    }
+    return null;
+  }
+
   componentDidMount() {
-    const { region, onMount } = this.props;
+    const { region, onMount, } = this.props;
     onMount(region.id, this.wrapRef.current);
     this.updatePercents();
   }
 
   componentWillUnmount() {
-    const { region, onUnmount } = this.props;
+    const { region, onUnmount, } = this.props;
     onUnmount(region.id);
   }
 
   componentDidUpdate(oldProps) {
-    const { region, percents } = this.props;
+    const { region, percents, } = this.props;
     if (!isEqual(region.id, oldProps.region.id) || !isEqual(percents, oldProps.percents)) {
       this.updatePercents();
     }
   }
 
   currentTheme = () => {
-    const { theme } = this.props;
+    const { theme, } = this.props;
     const { hover, } = this.state;
     let current = 'normal';
     if (hover) current = 'hover';
@@ -107,21 +120,13 @@ class Info extends PureComponent {
     });
   };
 
-  onMouseEnter = () => {
-    const { region } = this.props;
-    this.setState({ hover: true });
-    fireEvent(`region-${region.id}`, 'mouseover');
-  };
+  onMouseEnter = () => this.setState({ hover: true, });
 
-  onMouseLeave = () => {
-    const { region } = this.props;
-    this.setState({ hover: false });
-    fireEvent(`region-${region.id}`, 'mouseout');
-  };
+  onMouseLeave = () => this.setState({ hover: false, });
 
   onClick = () => {
-    const { onClick, region: { id } } = this.props;
-    if (onClick) onClick({ id });
+    const { onClick, region: { id, }, } = this.props;
+    if (onClick) onClick({ id, });
     else fireEvent(`region-${id}`, 'click');
   };
 
@@ -187,22 +192,26 @@ class Info extends PureComponent {
   };
 
   render() {
-    const { region } = this.props;
+    const { region, } = this.props;
+    const { hover, hidden } = this.state;
     const theme = this.currentTheme();
     const size = theme.radius * 2;
+
+    const visible = !hidden || hover;
 
     return (
       <Wrap
         id={`info-${region.id}`}
         innerRef={this.wrapRef}
+        {...!visible && { style: { display: 'none', }, }}
+        onMouseEnter={this.onMouseEnter}
+        onMouseLeave={this.onMouseLeave}
       >
         <SvgWrap
           width={size}
           height={size}
           viewBox="0 0 41 41"
           fill="none"
-          onMouseEnter={this.onMouseEnter}
-          onMouseLeave={this.onMouseLeave}
           onClick={this.onClick}
         >
           <g transform="rotate(-90)translate(-41 0)">
@@ -213,8 +222,6 @@ class Info extends PureComponent {
           color={theme.titleColor}
           fontSize={theme.titleSize}
           marginLeft={size + 10}
-          onMouseEnter={this.onMouseEnter}
-          onMouseLeave={this.onMouseLeave}
           onClick={this.onClick}
         >
           {region.title}

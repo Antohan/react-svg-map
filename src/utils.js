@@ -1,5 +1,5 @@
-import get from "lodash/get";
-import defaultTheme from "./theme/defaultTheme";
+import get from 'lodash/get';
+import defaultTheme from './theme/defaultTheme';
 
 export function getAllPlainValuesAsObj(obj) {
   const plain = {};
@@ -58,15 +58,15 @@ export function getSequence(from, to, total, precision = 10) {
 }
 
 export function getScale(wrapSize, targetSize, precision = 100) {
-  const [maxWidth, maxHeight] = wrapSize;
-  const [targetWidth, targetHeight] = targetSize;
+  const [maxWidth, maxHeight, ] = wrapSize;
+  const [targetWidth, targetHeight, ] = targetSize;
 
   const scale = Math.min(maxWidth / targetWidth, maxHeight / targetHeight);
 
   return Math.round((scale - scale / 10) * precision) / precision;
 }
 
-export function getPosition([mapX, mapY] = [0, 0], [targetX, targetY] = [0, 0], wrapper) {
+export function getPosition([mapX, mapY, ] = [0, 0, ], [targetX, targetY, ] = [0, 0, ], wrapper) {
   let x = Math.floor(Math.abs(mapX - targetX));
   let y = Math.floor(Math.abs(mapY - targetY));
   if (targetX > mapX) x *= -1;
@@ -74,7 +74,7 @@ export function getPosition([mapX, mapY] = [0, 0], [targetX, targetY] = [0, 0], 
 
   const scale = Math.min(wrapper.width / 2 / mapX, wrapper.height / 2 / mapY);
 
-  return [x * scale, y * scale];
+  return [x * scale, y * scale, ];
 }
 
 export function getTheme(theme, key) {
@@ -90,20 +90,20 @@ export function getFlatMap(map) {
   const result = {};
   if (!map) return result;
 
-  function getFlatArray(element) {
+  function getFlatArray(element, owner) {
     let res = [];
 
-    res.push(element);
+    res.push({ ...element, owner, });
     if (element.children) {
       element.children.forEach((child) => {
-        res = [].concat(res, getFlatArray(child));
+        res = [].concat(res, getFlatArray(child, element.id));
       });
     }
 
     return res;
   }
 
-  getFlatArray(map).forEach((element) => {
+  getFlatArray(map, map.id).forEach((element) => {
     result[element.id] = element;
   });
 
