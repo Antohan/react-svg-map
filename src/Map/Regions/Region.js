@@ -1,7 +1,7 @@
 import React, { PureComponent, } from 'react';
 import PropTypes from 'prop-types';
 import { withTheme, } from 'styled-components';
-import { getTheme, } from '../../utils';
+import {fireEvent, getTheme,} from '../../utils';
 import { defaultTheme, } from '../../theme/index';
 
 
@@ -57,9 +57,17 @@ class Region extends PureComponent {
     if (onClick) onClick({ id: data.id, rect, });
   };
 
-  onMouseEnter = () => this.setState({ hover: true, });
+  onMouseEnter = () => {
+    const { data, } = this.props;
+    this.setState({ hover: true, });
+    fireEvent(`info-${data.id}`, 'mouseover');
+  };
 
-  onMouseLeave = () => this.setState({ hover: false, });
+  onMouseLeave = () => {
+    const { data, } = this.props;
+    this.setState({ hover: false, });
+    fireEvent(`info-${data.id}`, 'mouseout');
+  };
 
   render() {
     const { data, active } = this.props;

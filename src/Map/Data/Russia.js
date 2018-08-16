@@ -2,7 +2,7 @@ const Russia = {
   id: 'RF',
   center: [500, 284],
   size: [1000, 568],
-  title: 'Российская федерация',
+  title: 'Российская Федерация',
   children: [
     {
       id: 'CFO',

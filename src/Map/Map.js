@@ -261,20 +261,22 @@ class Map extends PureComponent {
   };
 
   renderInfo = () => {
-    const { info, onInfoClick, } = this.props;
-    const { flatMap, hideInfo, } = this.state;
-    if (!info || hideInfo) return (null);
+    const { info, onInfoClick, region } = this.props;
+    const { flatMap, hideInfo, map, } = this.state;
+    if (!info) return (null);
 
     return info.map((i) => {
-      const region = flatMap[i.region];
-      if (!region) return (null);
+      const data = flatMap[i.region];
+      if (!data) return (null);
+      const hidden = hideInfo || i.owner !== map.id || region === i.region;
 
       return (
         <Info
           key={i.region}
-          region={region}
+          region={data}
           percents={i.percents}
           onClick={onInfoClick}
+          hidden={hidden}
           onMount={this.onInfoMount}
           onUnmount={this.onInfoUnmount}
         />
