@@ -66,7 +66,6 @@ class Info extends PureComponent {
 
   static getDerivedStateFromProps(nextProps, oldState) {
     if (nextProps.hidden !== oldState.hidden) {
-      if (oldState.hover) return { hidden: false, };
       return { hidden: nextProps.hidden, };
     }
     return null;
