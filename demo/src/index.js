@@ -48,19 +48,19 @@ class Demo extends Component {
 
   wrapRef = React.createRef();
 
-  onRegionClick = (region) => {
-    this.setState(oldState => {
-      let newState = { region: region.id };
-      if (region.target && oldState.region && oldState.region !== 'RF') {
-        newState = {
-          ...newState,
-          showInfoLegend: true,
-          infoLegendId: region.target.id
-        };
-      }
+  onRegionClick = (clicked) => {
+    const { region } = this.state;
 
-      return newState;
-    });
+    if (clicked.target && clicked.id === region && region && region !== 'RF') {
+      this.setState({
+        showInfoLegend: true,
+        infoLegendId: clicked.target.id,
+      });
+      return false;
+    }
+
+    this.setState({ region: clicked.id });
+    return true;
   };
 
   onFlagClick = () => {
