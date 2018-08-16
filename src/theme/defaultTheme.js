@@ -1,8 +1,9 @@
 const defaultTheme = {
   Map: {
-    backgroundFill: '#212c42',
-    verticalLines: 7,
-    horizontalLines: 2,
+    backgroundFill: '#fff',
+    verticalLines: 9,
+    horizontalLines: 7,
+    backgroundLineColor: 'rgba(48, 71, 116, 0.1)',
     District: {
       normal: {
         fill: 'transparent',
