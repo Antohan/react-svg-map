@@ -1,8 +1,8 @@
 import React, { PureComponent, } from 'react';
 import PropTypes from 'prop-types';
-import { withTheme } from 'styled-components';
+import { withTheme, } from 'styled-components';
 import Region from './Region';
-import { getTheme } from '../../utils';
+import { getTheme, } from '../../utils';
 import defaultTheme from '../../theme/defaultTheme';
 
 
@@ -37,8 +37,8 @@ class District extends PureComponent {
   theme = {};
 
   currentTheme = () => {
-    const { data, selectedId, mapId, theme } = this.props;
-    const { hover } = this.state;
+    const { data, selectedId, mapId, theme, } = this.props;
+    const { hover, } = this.state;
     const active = data.id === selectedId;
     const inactive = (!!selectedId && (selectedId !== mapId)) && !active;
 
@@ -64,14 +64,14 @@ class District extends PureComponent {
   };
 
   onClick = (target) => {
-    const { onClick, data } = this.props;
+    const { onClick, data, } = this.props;
     const rect = this.wrapRef.current.getBoundingClientRect();
-    onClick({ id: data.id, rect, target });
+    onClick({ id: data.id, rect, target, });
   };
 
   render() {
-    const { data, selectedId, mapId } = this.props;
-    const { hover } = this.state;
+    const { data, selectedId, mapId, } = this.props;
+    const { hover, } = this.state;
     const theme = this.currentTheme();
     const active = data.id === selectedId;
     const inactive = (!!selectedId && (selectedId !== mapId)) && !active;
@@ -88,12 +88,13 @@ class District extends PureComponent {
             key={child.id}
             data={child}
             selectedId={selectedId}
-            active={active || hover}
+            hovered={hover}
+            active={active}
             inactive={inactive}
             onClick={this.onClick}
           />
         ))}
-        <path d={data.path} {...theme} style={{ pointerEvents: 'none' }} />
+        <path d={data.path} {...theme} style={{ pointerEvents: 'none', }} />
       </g>
     );
   }

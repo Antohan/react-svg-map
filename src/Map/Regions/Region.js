@@ -1,7 +1,7 @@
 import React, { PureComponent, } from 'react';
 import PropTypes from 'prop-types';
 import { withTheme, } from 'styled-components';
-import { getTheme } from '../../utils';
+import { getTheme, } from '../../utils';
 import { defaultTheme, } from '../../theme/index';
 
 
@@ -19,6 +19,7 @@ class Region extends PureComponent {
     }),
     active: PropTypes.bool,
     inactive: PropTypes.bool,
+    hovered: PropTypes.bool,
   };
 
   static defaultProps = {
@@ -26,6 +27,7 @@ class Region extends PureComponent {
     onClick: undefined,
     active: false,
     inactive: false,
+    hovered: false,
   };
 
   state = {
@@ -37,10 +39,10 @@ class Region extends PureComponent {
   theme = {};
 
   currentTheme = () => {
-    const { active, theme, inactive } = this.props;
+    const { active, theme, inactive, hovered } = this.props;
     const { hover, } = this.state;
     let current = 'normal';
-    if (active) current = 'active';
+    if (active || hovered) current = 'active';
     else if (inactive) current = 'inactive';
     if (hover) current = 'hover';
 
@@ -52,7 +54,7 @@ class Region extends PureComponent {
   onClick = () => {
     const { onClick, data, } = this.props;
     const rect = this.wrapRef.current.getBoundingClientRect();
-    if (onClick) onClick({ id: data.id, rect });
+    if (onClick) onClick({ id: data.id, rect, });
   };
 
   onMouseEnter = () => this.setState({ hover: true, });
@@ -60,22 +62,22 @@ class Region extends PureComponent {
   onMouseLeave = () => this.setState({ hover: false, });
 
   render() {
-    const { data, inactive } = this.props;
+    const { data, active } = this.props;
     const theme = this.currentTheme();
-    const props = false
-      ? {}
-      : {
+    const props = active
+      ? {
         onMouseEnter: this.onMouseEnter,
         onMouseLeave: this.onMouseLeave,
-        onClick: this.onClick,
-        ...data.translate && { transform: `translate(${data.translate})` },
-      };
+      }
+      : {};
 
     return (
       <g
         id={`region-${data.id}`}
         ref={this.wrapRef}
+        onClick={this.onClick}
         {...props}
+        {...data.translate && { transform: `translate(${data.translate})`, }}
       >
         <path d={data.path} {...theme} />
       </g>
