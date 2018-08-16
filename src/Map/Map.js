@@ -178,8 +178,11 @@ class Map extends PureComponent {
 
   onRegionClick = (region) => {
     const { onRegionClick, } = this.props;
-    if (onRegionClick) onRegionClick(region);
-    this.zoomToSelectedId(region.id);
+    let update = true;
+    if (onRegionClick) {
+      update = onRegionClick(region);
+    }
+    if (update) this.zoomToSelectedId(region.id);
   };
 
   onZoomInClick = () => {
