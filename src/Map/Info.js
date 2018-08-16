@@ -32,7 +32,6 @@ const SvgWrap = styled.svg`
   left: 0;
   top: 50%;
   transform: translateY(-50%);
-  filter: drop-shadow( 2px 2px 1px rgba(0,0,0,.7) );
   pointer-events: none;
 `;
 

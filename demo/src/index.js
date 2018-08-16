@@ -59,7 +59,7 @@ class Demo extends Component {
       return false;
     }
 
-    this.setState({ region: clicked.id });
+    this.setState({ region: clicked.id, showInfoLegend: false, });
     return true;
   };
 
@@ -101,7 +101,7 @@ class Demo extends Component {
   };
 
   render() {
-    const { info, region, } = this.state;
+    const { info, region, infoLegendId, } = this.state;
 
     return (
       <div style={{ width: '100%', height: '700px', }}>
@@ -114,6 +114,7 @@ class Demo extends Component {
             country="russia"
             region={region}
             info={info}
+            visibleInfo={infoLegendId}
             favorites={2}
             onRegionClick={this.onRegionClick}
             onFlagClick={this.onFlagClick}

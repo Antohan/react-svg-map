@@ -59,6 +59,7 @@ class Map extends PureComponent {
       percents: PropTypes.arrayOf(PropTypes.number.isRequired).isRequired,
       region: PropTypes.string.isRequired,
     })),
+    visibleInfo: PropTypes.string,
     favorites: PropTypes.number,
     onZoomInClick: PropTypes.func,
     onZoomOutClick: PropTypes.func,
@@ -73,6 +74,7 @@ class Map extends PureComponent {
     region: null,
     favorites: null,
     info: [],
+    visibleInfo: null,
     onZoomInClick: null,
     onZoomOutClick: null,
     onFlagClick: null,
@@ -264,14 +266,15 @@ class Map extends PureComponent {
   };
 
   renderInfo = () => {
-    const { info, onInfoClick, region } = this.props;
+    const { info, onInfoClick, region, visibleInfo, } = this.props;
     const { flatMap, hideInfo, map, } = this.state;
     if (!info) return (null);
 
     return info.map((i) => {
       const data = flatMap[i.region];
       if (!data) return (null);
-      const hidden = hideInfo || i.owner !== map.id || region === i.region;
+      const hidden = hideInfo
+        || (visibleInfo !== i.region && (i.owner !== map.id || region === i.region));
 
       return (
         <Info

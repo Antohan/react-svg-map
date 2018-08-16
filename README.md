@@ -28,6 +28,7 @@ import Map, { THEMES } from "@crpt/react-svg-map";
 | country: String  | Country name. Default: 'russia' |  `<Map country="russia" />` |
 | region: String  | Country region id. Default: 'RF' |  `<Map region="DFO" />` |
 | info: Array  | Map info. Note1. |  `<Map info={[{ percent: 22, region: 'DFO'}]} />` |
+| visibleInfo: String | Dont hide this info | `<Map visibleInfo="DFO" />` |
 | favorites: Integer | Counter for Flag button | `<Map favorites={2} />` |
 | onZoomInClick: Function | Callback for ZoomIn control. Receives new scale. | `<Map onZoomInClick={scale => console.log(scale)} />` |
 | onZoomOutClick: Function | Callback for ZoomOut control. Receives new scale. | `<Map onZoomOutClick={scale => console.log(scale)} />` |
