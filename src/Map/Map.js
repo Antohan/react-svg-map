@@ -227,14 +227,14 @@ class Map extends PureComponent {
   };
 
   onZoom = () => {
-    const { wheelDeltaY } = d3event.sourceEvent;
+    const { deltaY, } = d3event.sourceEvent;
 
     const { transform, } = getComputedStyle(this.wrapRef.current);
     const match = transform.match(/matrix\((-?[\d.]+), -?\d+, -?\d+, (-?[\d.]+), (-?[\d.]+), (-?[\d.]+)\)/);
     if (match) {
       const scale = parseFloat(match[1]);
       const newScale = Math.round(
-        (wheelDeltaY > 0 ? scale - scale * 0.033 : scale + scale * 0.025) * 100
+        (deltaY > 0 ? scale - scale * 0.033 : scale + scale * 0.025) * 100
       ) / 100;
       const left = parseInt(match[3], 10);
       const top = parseInt(match[4], 10);
