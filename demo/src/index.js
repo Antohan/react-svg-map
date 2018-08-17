@@ -64,9 +64,7 @@ class Demo extends Component {
   };
 
   onFlagClick = () => {
-    this.setState({ region: 'RF', info: null, showInfoLegend: false}, () => {
-      this.setState({ region: 'RF', info: info });
-    });
+    this.setState({ region: 'RF', showInfoLegend: false });
   };
 
   onZoomClick = () => this.setState({ showInfoLegend: false });
@@ -108,7 +106,7 @@ class Demo extends Component {
         <h1>
           react-svg-map Demo
         </h1>
-        <div style={{ width: '100%', height: '800px', position: 'relative' }} ref={this.wrapRef}>
+        <div style={{ width: '100%', height: '568px', position: 'relative' }} ref={this.wrapRef}>
           <Map
             theme={theme}
             country="russia"

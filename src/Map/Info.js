@@ -13,6 +13,7 @@ const Wrap = styled.div`
   height: 0;
   top: -100px;
   left: 0;
+  z-index: 1;
 `;
 
 const TextWrap = styled.div`
